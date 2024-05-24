@@ -40,7 +40,7 @@ Web assets will be placed in `out/`. Half the stuff in there might not be necess
 
 ## reverse proxying
 
-my config for a subdomain, with the websocket at `/socket`. `ts/main.ts` has the address set to `"wss://filaments.some.site/socket"`.
+my config for a subdomain, with the websocket at `/socket/`. `ts/main.ts` has the address set to `"wss://filaments.some.site/socket/"`.
 ```NGINX
 server {
     listen 80;
