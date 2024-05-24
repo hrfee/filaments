@@ -1,0 +1,589 @@
+@import "remixicon.css";
+@import "./modal.css";
+@import "./dark.css";
+@import "./tooltip.css";
+@import "./loader.css";
+@import "./fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --border-width-default: 2px;
+    --border-width-2: 3px;
+    --border-width-4: 5px;
+    --border-width-8: 8px;
+    font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+    --bg-light: #fff;
+    --bg-dark: #101010;
+}
+
+.light {
+    --settings-section-button-filter: 90%;
+}
+
+.dark {
+    --settings-section-button-filter: 80%;
+}
+
+.dark body {
+    background-color: var(--bg-dark);
+}
+
+html:not(.dark) body {
+    background-color: var(--bg-light);
+}
+
+.dark select, .dark option, .dark input {
+    background: #202020;
+}
+
+html:not(.dark) .card.\@low:not(.\~neutral):not(.\~positive):not(.\~urge):not(.\~warning):not(.\~info):not(.\~critical),
+html:not(.dark) .card.\@low:not(.\~neutral):not(.\~positive):not(.\~urge):not(.\~warning):not(.\~info):not(.\~critical) > * {
+    /* Colors from ~neutral */
+    --color-fill-high: #64748b;
+    --color-fill-low: #e2e8f0;
+    --color-content-high: #f8fafc;
+    --color-content-low: #1e293b;
+    --color-accent-high: #475569;
+    --color-accent-low: #cbd5e1;
+    --color-muted-high: #475569;
+    --color-muted-low: #f1f5f9;
+    background-color: #fff;
+}
+
+.light-only {
+  display: none;
+}
+
+.dark-only {
+  display: initial;
+}
+
+.page-container {
+    margin: 5% 20% 5% 20%;
+}
+
+@media (max-width: 1100px) {
+    .page-container {
+        margin: 2%;
+        margin-top: 5rem;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    :root {
+        font-size: 0.9rem;
+    }
+    .table-responsive table {
+        min-width: 800px;
+    }
+}
+
+.chip.btn:hover:not([disabled]):not(.textarea),
+.chip.btn:focus:not([disabled]):not(.textarea) {
+    filter: brightness(var(--button-filter-brightness,95%));
+}
+
+.banner {
+    margin: calc(-1 * var(--spacing-4,1rem));
+}
+
+.banner.header {
+    margin-bottom: var(--spacing-4,1rem);
+    max-width: calc(100% + 2.2rem); /* no idea why this works */
+    margin-left: -1.1rem;
+}
+
+.banner.footer {
+    margin-top: var(--spacing-4,1rem);
+    padding: var(--spacing-4,1rem);
+}
+
+div.card:contains(section.banner.footer) {
+    padding-bottom: 0px;
+}
+
+.tab-button {
+    font-size: 2rem;
+}
+
+.al {
+    text-align: left;
+}
+
+.ar {
+    text-align: right;
+}
+
+.ac {
+    text-align: center;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.h-100 {
+    height: 100%;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.align-top {
+    align-items: top;
+}
+
+.flex-expand {
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-row-group {
+    display: block;
+    flex-grow: 1;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row.baseline {
+    align-items: baseline;
+}
+
+.col {
+    flex: 1;
+    margin: 0.5rem;
+}
+
+p.sm,
+span.sm:not(.heading) {
+    font-size: 0.75rem;
+}
+
+
+.col.sm {
+    margin: .25rem;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-form {
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (min-width: 768px) {
+    .flex-form {
+        flex: 1;
+        margin: 0.5rem;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .row {
+        flex-direction: column;
+    }
+    .col {
+        flex: 45%;
+    }
+}
+
+sup.\~critical, .text-critical {
+    color: var(--color-critical-normal-content);
+}
+
+.grey {
+    color: var(--color-neutral-500);
+}
+
+.aside.sm {
+    font-size: 0.8rem;
+    padding: 0.8rem;
+}
+
+.support.lg {
+    font-size: 1rem;
+}
+
+.badge.lg {
+    font-size: 1rem;
+}
+
+.inv-created-users strong,p {
+    padding-left: 0.5rem;
+    padding-bottom: 0.2rem;
+}
+
+.inv-created-users.empty strong,p {
+    padding: 0;
+}
+
+.inv {
+    overflow: visible;
+}
+
+.inv-table {
+    font-size: 0.8rem;
+}
+
+.inv-profilearea {
+    min-width: 20%;
+}
+
+.inv-profileselect {
+    min-width: 100%;
+}
+
+.inv-codearea {
+    max-width: 40%;
+    min-width: 10rem;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.inv-empty .inv-codearea {
+    justify-content: start;
+}
+
+
+.invite-link {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: auto;
+}
+
+.ellipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.no-pad {
+    padding: 0px 0px 0px 0px;
+}
+
+.elem-pad > * {
+    margin: var(--spacing-4, 1rem);
+}
+
+.icon.clickable {
+    padding: 0.5rem 0.6rem;
+}
+
+.input {
+    box-sizing: border-box; /* fixes weird length issue with inputs */
+}
+
+.button.lg {
+    height: 2.5rem;
+}
+
+.submit {
+    border: none;
+    outline: none; /* remove browser styling on submit buttons */
+}
+
+.full-width { /* full width inputs */
+    box-sizing: border-box; /* TODO: maybe remove if we figure out input thing? */
+    width: 100%;
+}
+
+.flex-auto {
+    flex: auto;
+}
+
+.center {
+    justify-content: center;
+}
+
+.middle {
+    align-items: center;
+}
+
+.no-lp {
+    padding-left: 0px;
+}
+
+.block {
+    display: block;
+}
+
+.focused {
+    display: block;
+}
+
+.unfocused {
+    display: none;
+}
+
+.rotated {
+    transform: rotate(180deg);
+    -webkit-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    -moz-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    -o-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+}
+
+.not-rotated {
+    transform: rotate(0deg);
+    -webkit-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    -moz-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    -o-transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+    transition: all 0.3s cubic-bezier(0,.89,.27,.92);
+}
+
+.stealth-input {
+    font-size: 1rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    margin-left: 0.5rem;
+    margin-right: 1rem;
+    max-width: 75%;
+}
+
+.stealth-input-hidden {
+    border-style: none;
+    --fallback-box-shadow: none;
+    --field-hover-box-shadow: none;
+    --field-focus-box-shadow: none;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+}
+
+.settings-section-button {
+    width: 100%;
+    height: 2.5rem;
+}
+
+.settings-section-button:hover, .settings-section-button:focus {
+    box-sizing: border-box;
+    width: 100%;
+    height: 2.5rem;
+    background-color: var(--color-neutral-normal-fill);
+    filter: brightness(var(--settings-section-button-filter)) !important;
+}
+
+.settings-section-button.selected {
+    filter: brightness(var(--settings-section-button-filter)) !important;
+}
+
+.setting {
+    margin-bottom: 0.25rem;
+}
+
+.textarea {
+    resize: vertical;
+}
+
+.overflow {
+    overflow: visible;
+}
+
+.overflow-y {
+    overflow-y: visible;
+}
+
+select, textarea {
+    color: inherit;
+    border: 0 solid var(--color-neutral-300);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+html.dark textarea {
+    background-color: #202020
+}
+
+input {
+    color: inherit;
+    border: 0 solid var(--color-neutral-300);
+}
+
+table {
+    color: var(--color-content);
+}
+
+
+
+p.top {
+    margin-top: 0px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    font-size: 0.9rem;
+}
+
+#notification-box {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 16;
+}
+
+.dropdown {
+    padding-bottom: 0.5rem;
+    margin-bottom: -0.5rem;
+}
+
+.dropdown.over-top {
+    position: absolute;
+}
+
+.dropdown-display.lg {
+    white-space: nowrap;
+}
+
+.dropdown-display.above {
+    top: auto;
+    bottom: 115%;
+}
+
+pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    background-color: var(--color-content-high) !important;
+    overflow-x: scroll;
+}
+
+.circle {
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 50%;
+}
+
+.circle.\~urge {
+    background-color: var(--color-urge-200);
+}
+
+.markdown-box {
+    max-height: 20rem;
+    display: block;
+    overflow-y: scroll;
+}
+
+a:link:not(.lang-link):not(.\~urge) {
+    color: var(--color-urge-200);
+}
+
+a:visited:not(.lang-link):not(.\~urge) {
+    color: var(--color-urge-100);
+}
+
+a:hover:not(.lang-link):not(.\~urge), a:active:not(.lang-link):not(.\~urge) {
+    color: var(--color-urge-200);
+}
+
+a.button,
+a.button:link,
+a.button:visited,
+a.button:focus,
+a.buton:hover {
+    color: var(--color-content) !important;
+}
+
+
+.link-center {
+    display: block;
+    text-align: center;
+}
+
+/* .search {
+    max-width: 15rem;
+    min-width: 10rem;
+} */
+
+td.img-circle {
+    width: 32px;
+    height: 32px;
+}
+
+span.img-circle.lg {
+    width: 64px;
+    height: 64px;
+}
+
+span.shield.img-circle {
+    padding: 0.2rem;
+}
+
+img.img-circle {
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.table td.sm {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+}
+
+.table-inline {
+    display: flex !important;
+    align-items: center;
+}
+
+div.card:contains(section.banner.footer) {
+    padding-bottom: 0px;
+}
+
+.card.sectioned {
+    padding: 0px;
+}
+
+.card.sectioned .section {
+    padding: var(--spacing-4, 1rem);
+}
+
+.button.discord.\@low {
+    background-color: rgba(88, 101, 242,60%);
+}
+
+.button.discord.\@low:not(.lang-link) {
+    color: rgba(38, 51, 192, 90%);
+}
+
+.pb-0i {
+    padding-bottom: 0px !important
+}
+
+.mx-0i {
+    margin-left: 0px !important;
+    margin-right: 0px !important
+}
+
+.text-center-i {
+    text-align: center !important;
+}
+
+input[type="checkbox" i], [class^="ri-"], [class*=" ri-"], .ri-refresh-line:before, .modal-close {
+    cursor: pointer;
+}
+
+
+.g-recaptcha {
+    overflow: hidden;
+    width: 296px;
+    height: 72px;
+    transform: scale(1.1);
+    transform-origin: top left;
+}
+
+.g-recaptcha iframe {
+    margin: -2px 0px 0px -4px;
+}

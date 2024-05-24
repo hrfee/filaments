@@ -1,0 +1,123 @@
+@import "css/base.css";
+@import "css/modal.css";
+
+:root {
+    --c-1: #ffe3ef;
+    --c-2: rgba(173, 201, 233, 0.4);
+    --grad-base: rgb(238,174,202);
+    --grad: linear-gradient(45deg, rgba(238,174,202,0.5) 0%, rgba(148,187,233,0.5) 100%);
+    --connector-width: .25rem;
+    --connector-length: 3rem;
+    --color-valid: #94BBE9;
+    --color-spangram: #EECE23;
+    --color-selected: #B5BAC0;
+}
+
+body {
+    /* background: #fff9e5 !important; */
+    /* background: linear-gradient(90deg, #AA5CC3 0%, #00A4DC 100%) !important; */
+}
+
+.char {
+    background-color: rgba(0,0,0, 0%);
+    border: 0.25rem solid rgba(0,0,0,0%);
+    position: relative;
+    touch-action: none;
+}
+
+.char.hinted {
+    border: 0.25rem dashed var(--color-valid);
+}
+
+.char.selected {
+    background-color: var(--color-selected);
+    /* border-radius: 50%; */
+}
+
+.char.valid {
+    background-color: var(--color-valid);
+}
+
+.char.spangram {
+    background-color: var(--color-spangram);
+}
+
+.button.\~info.\@low .progress {
+    height: 150%;
+    position: absolute;
+    left: 0;
+    background-color: var(--color-accent);
+    opacity: 0.5;
+}
+
+.connector {
+    position: absolute;
+    background-color: var(--color-selected);
+    opacity: 0.5;
+}
+
+.char.valid .connector {
+    background-color: var(--color-valid);
+}
+
+.char.spangram .connector {
+    background-color: var(--color-spangram);
+}
+
+.connector.u,.connector.d {
+    height: var(--connector-length);
+    width: var(--connector-width);
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.connector.u { bottom: 50%; }
+.connector.d { top: 50%; }
+
+.connector.l,.connector.r {
+    width: var(--connector-length);
+    height: var(--connector-width);
+    top: 0;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.connector.l { right: 50%; }
+.connector.r { left: 50%; }
+
+.connector.ur, .connector.ul {
+    height: calc(var(--connector-length) * 1.5);
+    width: var(--connector-width);
+    margin-left: auto;
+    margin-right: auto;
+    bottom: 0.5em;
+}
+
+.connector.ur {
+    transform: rotate(45deg);
+    left: 2.5em;
+}
+.connector.ul {
+    transform: rotate(-45deg);
+    right: 2.5em;
+}
+
+.connector.dr, .connector.dl {
+    height: calc(var(--connector-length) * 1.5);
+    width: var(--connector-width);
+    margin-left: auto;
+    margin-right: auto;
+    top: 0.5em;
+}
+
+.connector.dr {
+    transform: rotate(-45deg);
+    left: 2.5em;
+}
+.connector.dl {
+    transform: rotate(45deg);
+    right: 2.5em;
+}

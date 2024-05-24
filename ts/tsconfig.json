@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "../js",
+        "target": "es6",
+        "lib": ["dom", "es2017", "es2022"],
+        "typeRoots": ["./typings", "../node_modules/@types"],
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowImportingTsExtensions": true
+    }
+}

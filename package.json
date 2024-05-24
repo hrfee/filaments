@@ -1,0 +1,27 @@
+{
+  "name": "strands",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Harvey Tindall <hrfee@hrfee.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/dom-inputevent": "^1.0.9",
+    "a17t": "^0.10.1",
+    "cheerio": "^1.0.0-rc.12",
+    "esbuild": "^0.18.1 ",
+    "perl-regex": "^1.0.4",
+    "remixicon": "^3.3.0",
+    "tailwindcss": "^3.3.2",
+    "uncss": "^0.17.3",
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/ws": "^8.5.10",
+    "live-server": "^1.2.2"
+  }
+}
