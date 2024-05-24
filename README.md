@@ -67,7 +67,7 @@ server {
     root /mnt/strands/out/;
     index index.html;
     location /socket {
-        proxy_pass http://0.0.0.0:8802/; # serv.go address
+        proxy_pass http://0.0.0.0:8802; # serv.go address
         proxy_set_header Host $host;
 
         proxy_http_version 1.1;
