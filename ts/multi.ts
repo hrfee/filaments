@@ -112,6 +112,9 @@ export class MultiplayerClient {
 
     connect = (then: () => void = () => {}) => {
         this._ws = new WebSocket(this._url);
+        this._ws.onerror = () => {
+            window.notif.customError("errorConnect", "Couldn't connect to server, multiplayer & board download unavailable.");
+        }
         this._ws.onmessage = (e) => {
             // Split here, unlike go, discards leftover stuff when the limit (4) is reached, instead of including it w/ the last element.
             // so instead we use a custom one.
