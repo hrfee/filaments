@@ -729,6 +729,16 @@ func (b *BoardCache) ToFile(fname string) {
 }
 
 func main() {
-	g := NewServer("0.0.0.0", 8802)
+	addr := "0.0.0.0"
+	port := 8802
+	var err error
+	if len(os.Args) >= 3 {
+		addr = os.Args[1]
+		port, err = strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatalf("Invalid port: \"%s\"\n", os.Args[2])
+		}
+	}
+	g := NewServer(addr, port)
 	g.Serve()
 }
