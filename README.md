@@ -37,3 +37,43 @@ to use the address and port appropriate. If reverse proxying with HTTPS, make su
 Then run `make` (ensure node/npm is installed).
 
 Web assets will be placed in `out/`. Half the stuff in there might not be necessary, most of this project was ripped out of another. They are **not** hosted by the game server, so use something like NGINX
+
+## reverse proxying
+
+my config for a subdomain, with the websocket at `/socket`. `ts/main.ts` has the address set to `"wss://filaments.some.site/socket"`.
+```NGINX
+server {
+    listen 80;
+    server_name filaments.some.site;
+    return 301 https://filaments.some.site/;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name filaments.some.site;
+    include /etc/nginx/snippets/strong-ssl.conf;
+    
+    location ~ /.well-known {
+            allow all;
+    }
+
+	error_page 404 /404.html;
+    location = /404.html {
+        root /var/www/html/err;
+        internal;
+    }
+
+    root /mnt/strands/out/;
+    index index.html;
+    location /socket {
+        proxy_pass http://0.0.0.0:8802/; # serv.go address
+        proxy_set_header Host $host;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+    }
+}
+```
