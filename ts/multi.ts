@@ -459,9 +459,7 @@ export class MultiplayerUI {
         this._roomCodeArea.textContent = "Room: " + this.cli.room.rid;
         this._roomLinkCopy.classList.remove("hidden");
         this._roomLinkCopy.onclick = () => {
-            let url = window.location.href.split("/room/")[0];
-            if (url.at(url.length-1) != "/") url += "/";
-            url += "room/" + this.cli.room.rid;
+            let url = this.urlFromRID(this.cli.room.rid);
             toClipboard(url);
             this._roomLinkCopy.classList.add("~positive");
             this._roomLinkCopy.classList.remove("~info");
@@ -481,6 +479,19 @@ export class MultiplayerUI {
         window.notif.customSuccess("roomLeft", `Room left.`);
     };
 
+    ridFromURL = (): RID => {
+        let s = window.location.href.split("?room=");
+        if (s.length < 2) return ""
+        return s[s.length-1] as RID;
+    };
+
+    urlFromRID = (rid: RID): string => {
+        let url = window.location.href.split("?room=")[0];
+        if (url.at(url.length-1) != "/") url += "/";
+        url += "?room=" + rid;
+        return url;
+    };
+
     constructor(client: MultiplayerClient, modal: HTMLElement, roomTable: HTMLElement, roomCodeArea: HTMLElement, roomButton: HTMLButtonElement, roomLinkCopy: HTMLButtonElement, newRoomButton: HTMLButtonElement, boardLoader: (board: BoardData) => void) {
         this.cli = client;
         this._roomTable = roomTable;
@@ -497,6 +508,8 @@ export class MultiplayerUI {
         this.cli.connect(() => this.cli.loginOrNewUser(uid, ukey, () => {
             localStorage.setItem("uid", this.cli.user.uid);
             localStorage.setItem("key", this.cli.user.key);
+            let rid = this.ridFromURL();
+            if (rid != "") this.cli.cmdJoinRoom(rid, this.onJoinRoom);
         }));
 
         this.cli.onHostPromotion = () => {
