@@ -29,7 +29,7 @@ module.exports = {
                       transform: 'scale(1)'
                   },
                   '50%': {
-                      transform: 'scale(1.05)'
+                      transform: 'scale(1.2)'
                   },
                   '100%': {
                       transform: 'scale(1)'
@@ -60,7 +60,8 @@ module.exports = {
               'fade-in': 'fade-in 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               'fade-out': 'fade-out 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               'slide-in': 'slide-in 0.2s cubic-bezier(.08,.52,.01,.98)',
-              'slide-out': 'slide-out 0.2s cubic-bezier(.08,.52,.01,.98)'
+              'slide-out': 'slide-out 0.2s cubic-bezier(.08,.52,.01,.98)',
+              'select': 'pulsate 1s cubic-bezier(.08,.52,.01,.98)'
           },
           colors: {
               neutral: colors.slate,

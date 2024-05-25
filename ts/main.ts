@@ -18,6 +18,9 @@ window.notif = new notificationBox(document.getElementById("notification-box") a
 const EMPTY_GUESS = "_ _ _ _ _ _";
 const GET_HINT = "Get hint";
 
+const SELECT_ANIMATION = "animate-select";
+const SELECT_DURATION_MS = 300;
+
 class MessageBox {
     private _el: HTMLElement;
     private _timeout: number;
@@ -188,7 +191,22 @@ class GameBoard {
     };
 
     private resetChar = (el: HTMLElement, x: number, y: number) => {
-        el.innerHTML = `<div class="relative z-10">${this._board.startingBoard[y].at(x)}</div>`;
+        let innerHTML = `<div class="inner z-10 w-full h-full flex justify-center items-center`;
+        if (el.classList.contains("valid")) innerHTML += " valid";
+        if (el.classList.contains("selected")) innerHTML += " selected";
+        if (el.classList.contains("hinted")) innerHTML += " hinted";
+        if (el.classList.contains("spangram")) innerHTML += " spangram";
+        innerHTML += `"><div class="relative text-center">${this._board.startingBoard[y].at(x)}</div></div>`;
+        el.innerHTML = innerHTML;
+    };
+
+    private addClass(el: HTMLElement, c: string) {
+        el.classList.add(c);
+        el.querySelector(".inner").classList.add(c);
+    };
+    private rmClass(el: HTMLElement, c: string) {
+        el.classList.remove(c);
+        el.querySelector(".inner").classList.remove(c);
     };
 
     render = () => {
@@ -209,8 +227,8 @@ class GameBoard {
                 const chEl = document.createElement("div");
                 chEl.setAttribute("data-x", ""+x);
                 chEl.setAttribute("data-y", ""+y);
-                chEl.classList.add("char", "font-bold", "w-8", "h-8", "rounded-full", "flex", "justify-center", "items-center");
-                chEl.innerHTML = `<div class="relative z-10">${char}</div>`;
+                chEl.classList.add("char", "font-bold", "w-8", "h-8");
+                chEl.innerHTML = `<div class="inner z-10 w-full h-full flex justify-center items-center"><div class="relative text-center">${char}</div></div>`;
                 // containerEl.addEventListener("mousedown", () => this._onMouseDown(chEl, x, y));
                 // containerEl.addEventListener("touchstart", () => this._onMouseDown(chEl, x, y));
                 containerEl.addEventListener("pointerdown", () => this._onMouseDown(chEl, x, y));
@@ -305,7 +323,7 @@ class GameBoard {
             if (!foundEnd) {
                 newSelected.push(yx);
             } else {
-                this._grid[yx[0]][yx[1]].classList.remove("selected");
+                this.rmClass(this._grid[yx[0]][yx[1]], "selected");
                 this.resetChar(this._grid[yx[0]][yx[1]], yx[1], yx[0]);
             }
             if (!inclusive && !foundEnd && yx[0] == y && yx[1] == x) {
@@ -319,9 +337,9 @@ class GameBoard {
         // console.log("clear!");
         for (let i = 0; i < this._selected.length; i++) {
             let yx = this._selected[i];
-            this._grid[yx[0]][yx[1]].classList.remove("selected");
+            this.rmClass(this._grid[yx[0]][yx[1]], "selected");
             if (!keepHints) {
-                this._grid[yx[0]][yx[1]].classList.remove("hinted");
+                this.rmClass(this._grid[yx[0]][yx[1]], "hinted");
             }
             if (!keepConnectors) {
                 this.resetChar(this._grid[yx[0]][yx[1]], yx[1], yx[0]);
@@ -412,10 +430,11 @@ class GameBoard {
     private append(x: number, y: number, el: HTMLElement) {
         let needsConnector = this._selected.length > 0;
         this._selected.push([y, x]);
-        el.classList.add("selected");
+        this.addClass(el, "selected");
         if (needsConnector) {
             this.addConnector(el, [y, x], this._selected[this._selected.length-2]);
         }
+        this.animateSelected(el);
     }
 
     private _endGuess = (remote: boolean = false) => {
@@ -446,14 +465,24 @@ class GameBoard {
         }
     }
 
+    animateSelected = (el: HTMLElement) => {
+        let subEl = el.querySelector(".inner") as HTMLElement;
+        setTimeout(() => {
+            subEl.classList.remove(SELECT_ANIMATION);
+        }, SELECT_DURATION_MS);
+        subEl.style.cssText = `animation-duration: ${SELECT_DURATION_MS}ms !important; animation-iteration-count: 1 !important;`; // animation-fill-mode: initial !important;`;
+        subEl.classList.add(SELECT_ANIMATION)
+    }
+
     selectThemeWordByCoords = (word: string, coords: number[][]) => {
         this._themeWordsFound.push(word)
         for (let i = 0; i < coords.length; i++) {
             const el = this._grid[coords[i][0]][coords[i][1]];
-            el.classList.add("valid");
+            this.addClass(el, "valid");
             if (i != 0) {
                 this.addConnector(el, coords[i], coords[i-1]);
             }
+            this.animateSelected(el);
         }
         this._clear(true, true);
         this.updateWordCount();
@@ -464,10 +493,11 @@ class GameBoard {
         this._spangramCoords = coords;
         for (let i = 0; i < coords.length; i++) {
             const el = this._grid[coords[i][0]][coords[i][1]]
-            el.classList.add("spangram");
+            this.addClass(el, "spangram");
             if (i != 0) {
                 this.addConnector(el, coords[i], coords[i-1]);
             }
+            this.animateSelected(el);
         }
         this._clear(true, true);
     }
@@ -512,7 +542,7 @@ class GameBoard {
             break;
         }
         for (const c of this._board.themeCoords[themeWord]) {
-            this._grid[c[0]][c[1]].classList.add("hinted");
+            this.addClass(this._grid[c[0]][c[1]], "hinted");
         }
 
         this._wordsRemainingForHint = this.wordsToGetHint;

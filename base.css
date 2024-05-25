@@ -19,26 +19,31 @@ body {
 }
 
 .char {
+    position: relative;
+}
+
+.char .hinted, .char .selected, .char .valid, .char .spangram {
     background-color: rgba(0,0,0, 0%);
     border: 0.25rem solid rgba(0,0,0,0%);
     position: relative;
     touch-action: none;
+    border-radius: 9999px;
 }
 
-.char.hinted {
+.char .hinted {
     border: 0.25rem dashed var(--color-valid);
 }
 
-.char.selected {
+.char .selected {
     background-color: var(--color-selected);
     /* border-radius: 50%; */
 }
 
-.char.valid {
+.char .valid {
     background-color: var(--color-valid);
 }
 
-.char.spangram {
+.char .spangram {
     background-color: var(--color-spangram);
 }
 
