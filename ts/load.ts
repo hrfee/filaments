@@ -1,5 +1,5 @@
 import { Modal } from "./modules/modal.js";
-import { notificationBox } from "./modules/common.js";
+import { notificationBox, addLoader, removeLoader } from "./modules/common.js";
 import { BoardData, BoardSummary } from "./board.js";
 
 interface window extends Window {
@@ -37,6 +37,7 @@ export class BoardLoader {
                 window.notif.customSuccess("boardDownloaded", "Board downloaded.");
             }
             loadFunc(board);
+            this._modal.close();
         }
 
         this._fileButton.onclick = () => {
@@ -60,14 +61,18 @@ export class BoardLoader {
             this._modal.show();
         }
 
+        let nytSpecificButton = this._nytSpecific.querySelector("button") as HTMLButtonElement;
+        let nytSpecificInput = this._nytSpecific.querySelector("input") as HTMLInputElement;
         const loadSpecific = () => {
-            let input = this._nytSpecific.querySelector("input") as HTMLInputElement;
-            if (input.value == "") return;
-            this._downloadFunc(input.value, this._loadFunc);
-            this._modal.close();
+            if (nytSpecificInput.value == "") return;
+            addLoader(nytSpecificButton);
+            this._downloadFunc(nytSpecificInput.value, (board: string) => {
+                removeLoader(nytSpecificButton);
+                this._loadFunc(board)
+            });
         };
-        (this._nytSpecific.querySelector("button") as HTMLButtonElement).onclick = loadSpecific;
-        (this._nytSpecific.querySelector("input") as HTMLInputElement).onkeyup = (event: KeyboardEvent) => {
+        nytSpecificButton.onclick = loadSpecific;
+        nytSpecificInput.onkeyup = (event: KeyboardEvent) => {
             if (event.key == "Enter") loadSpecific();
         };
     }
@@ -93,8 +98,11 @@ export class BoardLoader {
         `;
         const dlButton = s.querySelector("button.download-board") as HTMLButtonElement;
         dlButton.onclick = () => {
-            this._downloadFunc(summary.date, this._loadFunc);
-            this._modal.close();
+            addLoader(dlButton);
+            this._downloadFunc(summary.date, (board: string) => {
+                removeLoader(dlButton);
+                this._loadFunc(board);
+            });
         };
         this._boardList.appendChild(s);
     }
