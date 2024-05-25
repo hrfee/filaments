@@ -38,6 +38,7 @@ const oBoardSummaries = () => `BOARDSUMMARIES\n`;
 
 const oGuess = (u: User, x: number, y: number) => `GUESS ${auth(u)} ${x} ${y}\n`;
 const oEndGuess = (u: User) => `ENDGUESS ${auth(u)}\n`;
+const oHint = (u: User) => `HINT ${auth(u)}\n`;
 
 const oThemeWord = (w: string) => `TWORD ${w}\n`;
 const oSpangram = (coords: number[][]) => {
@@ -68,6 +69,7 @@ const iGetBoard = "BOARD";
 const iBoardSummaries = "BOARDSUMMARY";
 const iGuess = "GUESS";
 const iEndGuess = "ENDGUESS\n";
+const iHint = "HINT\n";
 const iReqStateFromHost = "HOSTSTATE";
 const iThemeWord = "TWORD";
 const iSpangram = "SPANGRAM";
@@ -88,15 +90,16 @@ export class MultiplayerClient {
     private _endFunc: () => void;
     private _invalidFunc: () => void;
 
-    onGuess: (x: number, y: number) => void = (x: number, y: number) => {};
-    onEndGuess: () => void = () => {};
+    onGuess: (x: number, y: number) => void = (x: number, y: number) => { console.log("Guessed", x, y); };
+    onEndGuess: () => void = () => { console.log("Guess ended!"); };
+    onHintUsed: () => void = () => { console.log("Hint used!"); };
     onBoardRequest: () => BoardState;
-    onHostPromotion: () => void = () => { console.log("became host."); };
+    onHostPromotion: () => void = () => { console.log("Became host."); };
     onBoardStateThemeWord: (w: string) => void = (w: string) => { console.log("word:", w); };
-    onBoardStateSpangram: (coords: number[][]) => void = (coords: number[][]) => { console.log("spangram:", coords); };
-    onBoardStateWordsToGetHint: (w: number) => void = (w: number) => { console.log("words to get hint:", w); };
-    onPlayerJoined: (u: UID) => void = (u: UID) => { console.log("player", u, "joined."); };
-    onPlayerLeft: (u: UID) => void = (u: UID) => { console.log("player", u, "left"); };
+    onBoardStateSpangram: (coords: number[][]) => void = (coords: number[][]) => { console.log("Spangram coords:", coords); };
+    onBoardStateWordsToGetHint: (w: number) => void = (w: number) => { console.log("Words to get hint:", w); };
+    onPlayerJoined: (u: UID) => void = (u: UID) => { console.log("Player", u, "joined."); };
+    onPlayerLeft: (u: UID) => void = (u: UID) => { console.log("Player", u, "left"); };
     onBoardSummaryAdded: (summary: BoardSummary) => void = (summary: BoardSummary) => { console.log("date", summary.date, "clue", summary.clue, "editor", summary.editor); };
     onBoardReceived: () => void = () => {};
 
@@ -150,6 +153,10 @@ export class MultiplayerClient {
                 }
                 case iEndGuess: {
                     this.respEndGuess();
+                    break;
+                }
+                case iHint: {
+                    this.respHint();
                     break;
                 }
                 case iReqStateFromHost: {
@@ -346,14 +353,17 @@ export class MultiplayerClient {
     respGuess = (args: string[]) => {
         let x = +(args[1]);
         let y = +(args[2]);
-        console.log("Got guess", x, y);
         this.onGuess(x, y);
     };
 
-    respEndGuess = () => {
-        console.log("Guess ended!");
-        this.onEndGuess();
+    respEndGuess = () => this.onEndGuess();
+
+    cmdHint = () => {
+        if (this.room.rid == "") return;
+        this._ws.send(oHint(this.user));
     };
+
+    respHint = () => this.onHintUsed();
 
     cmdGetState = () => {
         if (this.room.rid == "") return;

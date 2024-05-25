@@ -92,7 +92,7 @@ class GameBoard {
         this._foundText = wordCount;
         this._hintButton = hintButton as HTMLButtonElement;
 
-        this._hintButton.onclick = this._useHint;
+        this._hintButton.onclick = () => this._useHint(false);
 
         this._wordsRemainingForHint = this.wordsToGetHint;
         this._m = new MultiplayerUI(
@@ -117,6 +117,7 @@ class GameBoard {
             this._endGuess(true);
             this.renderGuess();
         };
+        this._m.cli.onHintUsed = () => this._useHint(true);
         this._m.cli.onBoardRequest = (): BoardState => {
             return {
                 themeWordsFound: this._themeWordsFound,
@@ -238,7 +239,7 @@ class GameBoard {
         this._clickStart = [x, y];
         this._clickCurrent = [x, y];
         this._addToGuess(el, x, y, false, false);
-        console.log("down on", x, ", ", y);
+        // console.log("down on", x, ", ", y);
     };
     private _onMouseMove = (e: MouseEvent, el: HTMLElement, x: number, y: number) => {
         // Note: pointermove/touchmove will fire this on the initial pressed element, so as a workaround we can calculate from its coords.
@@ -256,7 +257,7 @@ class GameBoard {
         }
         if (!this._mouseDown || !this._formingGuess || (this._clickCurrent[0] == x && this._clickCurrent[1] == y)) return;
         this._clickCurrent = [x, y];
-        console.log("move over", x, ", ", y);
+        // console.log("move over", x, ", ", y);
         if (this._clickStart[0] != x || this._clickStart[1] != y) {
             this._inHover = true;
             this._addToGuess(el, x, y, false, true);
@@ -268,7 +269,7 @@ class GameBoard {
         const y = this._clickCurrent[1];
         const el = this._grid[y][x];
         this._mouseDown = false;
-        console.log("up on", x, ", ", y, "was drag:", this._inHover);
+        // console.log("up on", x, ", ", y, "was drag:", this._inHover);
         if (this._inHover) {
             this._addToGuess(el, x, y, true, true);
         }
@@ -501,7 +502,8 @@ class GameBoard {
         }
     };
 
-    private _useHint = () => {
+    private _useHint = (remote: boolean = false) => {
+        if (!remote) this._m.cli.cmdHint();
         let themeWord = "";
         for (const tw in this._board.themeCoords) {
             if (this._themeWordsFound.includes(tw)) continue;

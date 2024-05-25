@@ -50,6 +50,8 @@ const (
 	oGuess    = "GUESS %d %d\n"
 	iEndGuess = "ENDGUESS" // Args: UID, Key
 	oEndGuess = "ENDGUESS\n"
+	iHint     = "HINT" // Args: UID, Key
+	oHint     = "HINT\n"
 
 	iForward = "FORWARD" // Args: UID, Key, Target UID, Message
 
@@ -137,6 +139,7 @@ const (
 	mNewBoard
 	mPlayerJoined
 	mPlayerLeft
+	mHint
 )
 
 type CrossSessionMessage struct {
@@ -153,6 +156,8 @@ func (g *GameServer) CrossSessionMonitor(c *websocket.Conn, uid UID) {
 			g.resp(c, oEndGuess)
 		case mGuess:
 			g.resp(c, oGuess, msg.x, msg.y)
+		case mHint:
+			g.resp(c, oHint)
 		case mReqState:
 			// log.Printf("ReqState received from %s for host %s!\n", msg.src, uid)
 			g.resp(c, oReqStateFromHost, msg.src)
@@ -287,6 +292,9 @@ func (g *GameServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case iEndGuess:
 			log.Printf("\"%s\": ENDGUESS\n", uid)
 			g.cmdEndGuess(c, components)
+		case iHint:
+			log.Printf("\"%s\": HINT\n", uid)
+			g.cmdHint(c, components)
 		case iForward:
 			log.Printf("\"%s\": FORWARD", uid)
 			g.cmdForward(c, components)
@@ -512,6 +520,10 @@ func (g *GameServer) cmdGuess(c *websocket.Conn, args []string) {
 		g.resp(c, oInvalid)
 		return
 	}
+	if len(args) < 4 {
+		g.resp(c, oInvalid)
+		return
+	}
 	room, ok := g.rooms[u.room]
 	if !ok {
 		g.resp(c, oFail)
@@ -544,6 +556,26 @@ func (g *GameServer) cmdEndGuess(c *websocket.Conn, args []string) {
 	}
 	g.broadcastToRoom(room, CrossSessionMessage{
 		msgType: mEndGuess,
+	}, u.uid)
+}
+
+func (g *GameServer) cmdHint(c *websocket.Conn, args []string) {
+	u := g.auth(args)
+	if u == nil {
+		g.resp(c, oInvalid)
+		return
+	}
+	if u.room == "" {
+		g.resp(c, oInvalid)
+		return
+	}
+	room, ok := g.rooms[u.room]
+	if !ok {
+		g.resp(c, oFail)
+		return
+	}
+	g.broadcastToRoom(room, CrossSessionMessage{
+		msgType: mHint,
 	}, u.uid)
 }
 
