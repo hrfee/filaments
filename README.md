@@ -40,6 +40,8 @@ Web assets will be placed in `out/`. They are **not** hosted by the game server,
 ## reverse proxying
 
 my config for a subdomain, with the websocket at `/socket`. `ts/main.ts` has the address set to `"wss://filaments.some.site/socket"`.
+
+if using something else, just look up how to tunnel a websocket, and make sure the timeout/keepalive is set high enough, so the user doesn't disconnect while thinking (1h seems reasonable to me).
 ```NGINX
 server {
     listen 80;
@@ -73,6 +75,10 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
 
+        # Set these appropriately high, after this long of inactivity, the user will have to refresh
+        proxy_connect_timeout 1h;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
     }
 }
 ```
