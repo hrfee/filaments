@@ -13,13 +13,17 @@
     --color-selected: #B5BAC0;
 }
 
-body {
-    /* background: #fff9e5 !important; */
-    /* background: linear-gradient(90deg, #AA5CC3 0%, #00A4DC 100%) !important; */
-}
+/* body {
+    background: #fff9e5 !important;
+    background: linear-gradient(90deg, #AA5CC3 0%, #00A4DC 100%) !important;
+} */
 
 .char {
     position: relative;
+}
+
+.char .inner, #messagebox {
+    animation-iteration-count: 1 !important;
 }
 
 .char .hinted, .char .selected, .char .valid, .char .spangram {

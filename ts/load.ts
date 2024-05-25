@@ -69,18 +69,28 @@ export class BoardLoader {
 
     appendSummary = (summary: BoardSummary) => {
         this._summaries.push(summary);
-        let tr = document.createElement("tr");
+        /*let s = document.createElement("tr");
         tr.innerHTML = `
         <td class="pl-0">${summary.date}</td>
         <td>${summary.clue}</td>
         <td>${summary.editor}</td>
         <td class="pr-0"><button class="button ~info @low download-board">Download</button></td>
+        `; */
+        let s = document.createElement("div");
+        s.classList.add("card", "flex", "flex-col", "items-center", "gap-2");
+        s.innerHTML = `
+            <div class="support">${summary.date}</div>
+            <div class="font-bold text-xl">${summary.clue}</div>
+            <div title="Editor: ${summary.editor}">
+                ${summary.editor}
+            </div>
+            <button class="button ~info @low download-board">Download</button>
         `;
-        const dlButton = tr.querySelector("button.download-board") as HTMLButtonElement;
+        const dlButton = s.querySelector("button.download-board") as HTMLButtonElement;
         dlButton.onclick = () => {
             this._downloadFunc(summary.date, this._loadFunc);
             this._modal.close();
         };
-        this._boardList.appendChild(tr);
+        this._boardList.appendChild(s);
     }
 }

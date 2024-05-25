@@ -40,7 +40,7 @@
             </div>
         </div>
         <div id="modal-nyt" class="modal">
-            <div class="relative mx-auto my-[10%] w-4/5 lg:w-2/3 content card sectioned ~neutral @low p-0">
+            <div class="relative mx-auto my-[10%] w-4/5 lg:w-2/3 content card sectioned p-0">
                 <section class="p-4">
                     <span class="heading">Boards<span class="modal-close">&times;</span></span>
                     <label class="flex flex-row my-2" for="nyt-specific-input">Specific Date</label>
@@ -49,7 +49,7 @@
                         <button class="button ~info @low">Download</button>
                     </div>
                     <p class="support">Note: Future boards might work too!</p>
-                    <div class="overflow-x-auto">
+                    <!-- <div class="overflow-x-auto">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -61,12 +61,13 @@
                             </thead>
                             <tbody id="board-list"></tbody>
                         </table>
-                    </div>
+                    </div> -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-2" id="board-list"></div>
                 </section>
             </div>
         </div>
         <div id="notification-box"></div>
-        <div class="page-container" id="page-container">
+        <div class="m-[2%] lg:my-[5%] md:mx-[20%]" id="page-container">
             <div class="card sectioned ~neutral @low">
                 <section class="section">
                     <div class="flex flex-row justify-center">
@@ -74,7 +75,7 @@
                     </div>
                     <div class="flex flex-row justify-center supra text-lg my-2" id="guess">
                     </div>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <div class="flex flex-col-reverse sm:flex-row justify-center gap-4">
                         <div class="flex flex-col justify-center gap-4">
                             <div class="card ~neutral @low bg-transparent">
                                 <div id="messagebox" class="text-center font-bold text-2xl h-8"></div>
@@ -106,7 +107,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="flex flex-row select-none justify-center" id="board"></div>
+                        <div class="flex flex-row select-none justify-center touch-none" id="board"></div>
                     </div>
                 </section>
                 <section class="section ~info text-xs font-extralight italic">

@@ -85,10 +85,10 @@ export class MultiplayerClient {
     host: boolean;
     private _ws: WebSocket;
     private _roomToJoin: RID;
-    private _successFunc: () => void;
-    private _failFunc: () => void;
-    private _endFunc: () => void;
-    private _invalidFunc: () => void;
+    private _successFunc: () => void = () => {};
+    private _failFunc: () => void = () => {};
+    private _endFunc: () => void = () => {};
+    private _invalidFunc: () => void = () => {};
 
     onGuess: (x: number, y: number) => void = (x: number, y: number) => { console.log("Guessed", x, y); };
     onEndGuess: () => void = () => { console.log("Guess ended!"); };

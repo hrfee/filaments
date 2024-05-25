@@ -19,7 +19,8 @@ const EMPTY_GUESS = "_ _ _ _ _ _";
 const GET_HINT = "Get hint";
 
 const SELECT_ANIMATION = "animate-select";
-const SELECT_DURATION_MS = 300;
+const SELECT_DURATION_MS = 300; // Ensure value in tailwind.config.js matches!
+const HIGHLIGHT_STEP_DURATION = 40;
 
 class MessageBox {
     private _el: HTMLElement;
@@ -33,12 +34,11 @@ class MessageBox {
     msg = (msg: string, cssColor: string = "", timeout: number = -1) => {
         if (timeout == -1) timeout = this._timeout;
         this._el.textContent = msg;
-        this._el.style.color = cssColor;
-        setTimeout(() => {
+        this._el.onanimationend = () => {
             this._el.textContent = ``; 
             this._el.classList.remove(this._animate);
-        }, timeout);
-        this._el.style.cssText = this._el.style.cssText + `animation-duration: ${timeout}ms !important; animation-iteration-count: 1 !important;`;
+        };
+        this._el.style.cssText = `color: ${cssColor}; animation-duration: ${timeout}ms !important;`;
         this._el.classList.add(this._animate);
     }
 }
@@ -470,37 +470,39 @@ class GameBoard {
         setTimeout(() => {
             subEl.classList.remove(SELECT_ANIMATION);
         }, SELECT_DURATION_MS);
-        subEl.style.cssText = `animation-duration: ${SELECT_DURATION_MS}ms !important; animation-iteration-count: 1 !important;`; // animation-fill-mode: initial !important;`;
         subEl.classList.add(SELECT_ANIMATION)
     }
 
     selectThemeWordByCoords = (word: string, coords: number[][]) => {
         this._themeWordsFound.push(word)
-        for (let i = 0; i < coords.length; i++) {
-            const el = this._grid[coords[i][0]][coords[i][1]];
-            this.addClass(el, "valid");
-            if (i != 0) {
-                this.addConnector(el, coords[i], coords[i-1]);
-            }
-            this.animateSelected(el);
-        }
-        this._clear(true, true);
-        this.updateWordCount();
+        this.addClassByCoords(coords, "valid", this.updateWordCount);
     }
+    
 
     selectSpangramByCoords = (coords: number[][]) => {
         this._spangramFound = true;
         this._spangramCoords = coords;
-        for (let i = 0; i < coords.length; i++) {
+        this.addClassByCoords(coords, "spangram");
+    }
+
+    addClassByCoords = (coords: number[][], c: string, then: () => void = () => {}) => {
+        let i = 0;
+        const selectFunc = () => {
             const el = this._grid[coords[i][0]][coords[i][1]]
-            this.addClass(el, "spangram");
+            this.addClass(el, c);
             if (i != 0) {
                 this.addConnector(el, coords[i], coords[i-1]);
             }
             this.animateSelected(el);
-        }
-        this._clear(true, true);
-    }
+            i++;
+            if (i != coords.length) setTimeout(selectFunc, HIGHLIGHT_STEP_DURATION);
+            else {
+                this._clear(true, true)
+                then();
+            }
+        }; 
+        selectFunc();
+    };
 
     updateWordCount = () => {
         if (this._themeWordsFound.length == this._themeWordCount && this._spangramFound) {
@@ -527,9 +529,32 @@ class GameBoard {
     }
 
     renderGuess = () => {
-        this._guess.textContent = this._selected.length == 0 ? EMPTY_GUESS : "";
-        for (let i = 0; i < this._selected.length; i++) {
-            this._guess.textContent += this._board.startingBoard[this._selected[i][0]][this._selected[i][1]];
+        if (this._selected.length == 0) {
+            this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
+        } else if (this._selected.length == 1) {
+            const n = this._collectGuess();
+            this._guess.innerHTML = `<div class="animate-slide-up">${n}</div>`;
+        } else {
+            const og = this._guess.textContent;
+            const n = this._collectGuess();
+            const diff = n.length - og.length;
+            console.log("diff:", diff);
+            if (og == EMPTY_GUESS) this._guess.textContent = n;
+            else if (diff > 0) {
+                this._guess.textContent = n.substring(0, n.length-diff);
+                let i = 0;
+                const appendFunc = () => {
+                    const animEl = document.createElement("div");
+                    animEl.classList.add("animate-slide-up");
+                    animEl.textContent = n.at(n.length-1-i);
+                    this._guess.appendChild(animEl);
+                    i++;
+                    if (i < diff) setTimeout(appendFunc, 50);
+                };
+                appendFunc();
+            } else if (diff < 0) {
+                this._guess.textContent = n;
+            }
         }
     };
 
