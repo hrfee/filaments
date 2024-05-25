@@ -80,7 +80,7 @@ export class BoardLoader {
         s.classList.add("card", "flex", "flex-col", "items-center", "gap-2");
         s.innerHTML = `
             <div class="support">${summary.date}</div>
-            <div class="font-bold text-xl">${summary.clue}</div>
+            <div class="font-bold text-xl text-center">${summary.clue}</div>
             <div title="Editor: ${summary.editor}">
                 ${summary.editor}
             </div>
