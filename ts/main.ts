@@ -82,7 +82,6 @@ class GameBoard {
 
         this._wordsRemainingForHint = this.wordsToGetHint;
         this._m = new MultiplayerUI(
-            // new MultiplayerClient("wss://strands.hrfee.pw/socket"),
             new MultiplayerClient("ws://0.0.0.0:8802"),
             document.getElementById("modal-rooms"),
             document.getElementById("room-list"),

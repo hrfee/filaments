@@ -28,15 +28,14 @@ Boards will be cached upon request to `boards.json`. They will not be deleted ov
 
 ## the client
 
-Once you know the address the server's running on (and taken reverse proxying into consideration), open up `ts/main.ts`, and change the line:
-```typescript
-new MultiplayerClient("ws://0.0.0.0:8802"),
+Install node/npm, then run `npm i` while within the cloned repository to download deps (esbuild, tailwind, a17t...).
+
+Once you know the address the server's running on (and taken reverse proxying into consideration), set the full address in the `WS_ADDRESS` envvar, and `make`.
+If reverse proxying with HTTPS, make sure to change to use `wss://` instead of `ws://`:
+```shell
+$ WS_ADDRESS=wss://filaments.some.site/socket make
 ```
-to use the address and port appropriate. If reverse proxying with HTTPS, make sure to change `ws://` to `wss://`.
-
-Then run `make` (ensure node/npm is installed).
-
-Web assets will be placed in `out/`. Half the stuff in there might not be necessary, most of this project was ripped out of another. They are **not** hosted by the game server, so use something like NGINX
+Web assets will be placed in `out/`. They are **not** hosted by the game server, so use something like NGINX.
 
 ## reverse proxying
 
@@ -64,7 +63,7 @@ server {
         internal;
     }
 
-    root /mnt/strands/out/;
+    root /mnt/filaments/out/;
     index index.html;
     location /socket {
         proxy_pass http://0.0.0.0:8802; # serv.go address
