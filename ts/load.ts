@@ -1,25 +1,43 @@
 import { Modal } from "./modules/modal.js";
+import { notificationBox } from "./modules/common.js";
 import { BoardData, BoardSummary } from "./board.js";
+
+interface window extends Window {
+    notif: notificationBox;
+}
+
+declare var window: window;
 
 export class BoardLoader {
     private _fileButton: HTMLButtonElement;
     private _nytButton: HTMLButtonElement;
+    private _nytSpecific: HTMLElement;
     private _modal: Modal;
     private _boardList: HTMLElement;
+
+
     private _getBoardsFunc: () => void;
     private _downloadFunc: (date: string, then: (board: string) => void) => void;
     private _loadFunc: (newBoard: string) => void;
 
     private _summaries: BoardSummary[];
 
-    constructor(modal: HTMLElement, fileButton: HTMLButtonElement, nytButton: HTMLButtonElement, boardList: HTMLElement, getBoardsFunc: () => void, downloadFunc: (date: string, then: (board: string) => void) => void, loadFunc: (newBoard: string) => void) {
+    constructor(modal: HTMLElement, fileButton: HTMLButtonElement, nytButton: HTMLButtonElement, nytSpecific: HTMLElement, boardList: HTMLElement, getBoardsFunc: () => void, downloadFunc: (date: string, then: (board: string) => void) => void, loadFunc: (newBoard: string) => void) {
         this._fileButton = fileButton;
         this._nytButton = nytButton;
+        this._nytSpecific = nytSpecific;
         this._modal = new Modal(modal, false);
         this._boardList = boardList;
         this._getBoardsFunc = getBoardsFunc;
         this._downloadFunc = downloadFunc;
-        this._loadFunc = loadFunc;
+        this._loadFunc = (board: string) => {
+            if (board == "") {
+                window.notif.customError("failedDownload", "Couldn't download board.");
+            } else {
+                window.notif.customSuccess("boardDownloaded", "Board downloaded.");
+            }
+            loadFunc(board);
+        }
 
         this._fileButton.onclick = () => {
             let input = document.createElement("input") as HTMLInputElement;
@@ -41,16 +59,22 @@ export class BoardLoader {
             this._getBoardsFunc();
             this._modal.show();
         }
+
+        (this._nytSpecific.querySelector("button") as HTMLButtonElement).onclick = () => {
+            let input = this._nytSpecific.querySelector("input") as HTMLInputElement;
+            this._downloadFunc(input.value, this._loadFunc);
+            this._modal.close();
+        };
     }
 
     appendSummary = (summary: BoardSummary) => {
         this._summaries.push(summary);
         let tr = document.createElement("tr");
         tr.innerHTML = `
-        <td>${summary.date}</td>
+        <td class="pl-0">${summary.date}</td>
         <td>${summary.clue}</td>
         <td>${summary.editor}</td>
-        <td><button class="button ~info @low download-board">Download</button></td>
+        <td class="pr-0"><button class="button ~info @low download-board">Download</button></td>
         `;
         const dlButton = tr.querySelector("button.download-board") as HTMLButtonElement;
         dlButton.onclick = () => {

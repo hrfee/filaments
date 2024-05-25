@@ -43,14 +43,20 @@
             <div class="relative mx-auto my-[10%] w-4/5 lg:w-2/3 content card sectioned ~neutral @low p-0">
                 <section class="p-4">
                     <span class="heading">Boards<span class="modal-close">&times;</span></span>
+                    <label class="flex flex-row my-2" for="nyt-specific-input">Specific Date</label>
+                    <div class="flex flex-row gap-2 my-2" id="nyt-specific">
+                        <input type="text" id="nyt-specific-input" class="field ~neutral" placeholder="YYYY-MM-DD"></input>
+                        <button class="button ~info @low">Download</button>
+                    </div>
+                    <p class="support">Note: Future boards might work too!</p>
                     <div class="overflow-x-auto">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th class="pl-0">Date</th>
                                     <th>Clue</th>
                                     <th>Editor</th>
-                                    <th></th>
+                                    <th class="pr-0"></th>
                                 </tr>
                             </thead>
                             <tbody id="board-list"></tbody>

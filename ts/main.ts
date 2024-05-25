@@ -141,6 +141,7 @@ class GameBoard {
             document.getElementById("modal-nyt"),
             document.getElementById("load-file") as HTMLButtonElement,
             document.getElementById("load-nyt") as HTMLButtonElement,
+            document.getElementById("nyt-specific"),
             document.getElementById("board-list"),
             this._m.cli.cmdBoardSummaries,
             this._m.cli.cmdDownloadBoard,

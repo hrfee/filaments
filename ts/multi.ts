@@ -375,6 +375,9 @@ export class MultiplayerClient {
             // console.log("got board!", this.room.board);
             then(this.room.board);
         };
+        this._failFunc = () => {
+            then("");
+        };
         this._ws.send(oDownloadBoard(date));
     };
 
