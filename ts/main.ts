@@ -40,6 +40,20 @@ class MessageBox {
     }
 }
 
+function coordsMatch(a: number[], b: number[]): boolean {
+    return a[0] == b[0] && a[1] == b[1];
+}
+
+function validPositions(word: string, coords: number[][], char: string) {
+    let out: number[][] = [];
+    for (let i = 0; i < coords.length; i++) {
+        if (word.at(i) == char) {
+            out.push(coords[i]);
+        }
+    }
+    return out;
+}
+
 class GameBoard {
     private _el: HTMLElement;
     private _clue: HTMLElement;
@@ -357,7 +371,17 @@ class GameBoard {
             let coords = this._board.themeCoords[word];
             let match = true;
             for (let i = 0; i < coords.length; i++) {
-                if (!(coords[i][0] == this._selected[i][0] && coords[i][1] == this._selected[i][1])) {
+                // NOTE: As illustrated in official board 2024-04-27 with "QUEEN", where thera are multiple valid guess "paths" along the same board positions, any are valid.
+                // Hence we collect all possible positions and check them.
+                let positions = validPositions(word, coords, word.at(i));
+                let inAValidPosition = false;
+                for (let j = 0; j < positions.length; j++) {
+                    if (coordsMatch(coords[i], positions[j])) {
+                        inAValidPosition = true;
+                        break;
+                    }
+                }
+                if (!inAValidPosition) {
                     match = false;
                     break;
                 }
