@@ -10,7 +10,7 @@ debug:
 	./scripts/dark-variant.sh tempts
 	sed -i "s!$(PLACEHOLDER_ADDRESS)!$(WS_ADDRESS)!g" tempts/main.ts
 	npx esbuild --bundle base.css --outfile=out/bundle.css --external:remixicon.css --external:../fonts/hanken* --minify
-	npx esbuild --target=es6 --bundle ts/main.ts --sourcemap --outfile=out/main.js --minify
+	npx esbuild --target=es6 --bundle tempts/main.ts --sourcemap --outfile=out/main.js --minify
 	npx tailwindcss -c tailwind.config.js -i out/bundle.css -o out/bundle.css
 	# For when without internet: node node_modules/tailwindcss/lib/cli.js -c tailwind.config.js -i out/bundle.css -o out/bundle.css
 	cp images/src/*.svg out/

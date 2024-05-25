@@ -60,10 +60,15 @@ export class BoardLoader {
             this._modal.show();
         }
 
-        (this._nytSpecific.querySelector("button") as HTMLButtonElement).onclick = () => {
+        const loadSpecific = () => {
             let input = this._nytSpecific.querySelector("input") as HTMLInputElement;
+            if (input.value == "") return;
             this._downloadFunc(input.value, this._loadFunc);
             this._modal.close();
+        };
+        (this._nytSpecific.querySelector("button") as HTMLButtonElement).onclick = loadSpecific;
+        (this._nytSpecific.querySelector("input") as HTMLInputElement).onkeyup = (event: KeyboardEvent) => {
+            if (event.key == "Enter") loadSpecific();
         };
     }
 
