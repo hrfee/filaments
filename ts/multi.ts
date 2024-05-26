@@ -1,6 +1,7 @@
 import { notificationBox, splitByCharN, unicodeB64Decode, unicodeB64Encode, toClipboard } from "./modules/common.js";
 import { Modal } from "./modules/modal.js";
 import { BoardData, BoardState, BoardSummary } from "./board.js";
+import { HIGHLIGHT_STEP_DURATION } from "./main.js";
 
 type UID = string;
 type UserKey = string;
@@ -46,12 +47,20 @@ const oThemeWord = (w: string) => `TWORD ${w}\n`;
 const oSpangram = (coords: number[][]) => {
     let out = `SPANGRAM`;
     for (const pair of coords) {
-        console.log("pair:", pair);
         out += ` ${pair[0]},${pair[1]}`;
     }
     out += `\n`;
     return out;
 }
+const oCurrentGuess = (coords: number[][]) => {
+    let out = `CURRENTGUESS`;
+    for (const pair of coords) {
+        out += ` ${pair[0]},${pair[1]}`;
+    }
+    out += `\n`;
+    return out;
+}
+
 const oWordsToGetHint = (w: number) => `WORDSTOHINT ${w}\n`;
 
 const oGetState = (u: User) => `GETSTATE ${auth(u)}\n`;
@@ -75,6 +84,7 @@ const iHint = "HINT\n";
 const iReqStateFromHost = "HOSTSTATE";
 const iThemeWord = "TWORD";
 const iSpangram = "SPANGRAM";
+const iCurrentGuess = "CURRENTGUESS";
 const iWordsToGetHint = "WORDSTOHINT";
 const iNewHost = "NEWHOST\n";
 const iPlayerJoined = "JOINED";
@@ -178,6 +188,10 @@ export class MultiplayerClient {
                 }
                 case iSpangram: {
                     this.processSpangramCoords(components);
+                    break;
+                }
+                case iCurrentGuess: {
+                    this.processCurrentGuess(components);
                     break;
                 }
                 case iWordsToGetHint: {
@@ -430,10 +444,13 @@ export class MultiplayerClient {
         if (bd.spangramFound) {
             this._ws.send(oForward(this.user, target, oSpangram(bd.spangramCoords)));
         }
+        if (bd.currentGuess.length != 0) {
+            this._ws.send(oForward(this.user, target, oCurrentGuess(bd.currentGuess)));
+        }
         this._ws.send(oForward(this.user, target, oWordsToGetHint(bd.wordsToGetHint)));
     }
 
-    processSpangramCoords = (args: string[]) => {
+    processIncomingCoords = (args: string[]): number[][] => {
         let pairStrings = [];
         for (let i = 1; i < args.length; i++) {
             if (i == args.length-1) {
@@ -445,10 +462,27 @@ export class MultiplayerClient {
         }
         let coords: number[][] = [];
         for (let i = 0; i < pairStrings.length; i++) {
-            coords.push(pairStrings[i].split(","));
+            let sc = pairStrings[i].split(",");
+            coords.push([+sc[0], +sc[1]]);
         }
+        return coords
+    };
 
+    processSpangramCoords = (args: string[]) => {
+        const coords = this.processIncomingCoords(args);
         this.onBoardStateSpangram(coords);
+    }
+
+    processCurrentGuess = (args: string[]) => {
+        const coords = this.processIncomingCoords(args);
+        console.log("got coords", coords);
+        let i = 0; 
+        const addLoop = () => {
+            this.onGuess(coords[i][1], coords[i][0]);
+            i++
+            if (i != coords.length) setTimeout(addLoop, HIGHLIGHT_STEP_DURATION);
+        };
+        addLoop();
     }
 }
 
@@ -508,6 +542,17 @@ export class MultiplayerUI {
         return url;
     };
 
+    connect = () => {
+        let uid = localStorage.getItem("uid") as UID;
+        let ukey = localStorage.getItem("key") as UserKey;
+        this.cli.connect(() => this.cli.loginOrNewUser(uid, ukey, () => {
+            localStorage.setItem("uid", this.cli.user.uid);
+            localStorage.setItem("key", this.cli.user.key);
+            let rid = this.ridFromURL();
+            if (rid != "") this.cli.cmdJoinRoom(rid, this.onJoinRoom);
+        }));
+    }
+
     constructor(client: MultiplayerClient, modal: HTMLElement, roomTable: HTMLElement, roomCodeArea: HTMLElement, roomButton: HTMLButtonElement, roomLinkCopy: HTMLButtonElement, newRoomButton: HTMLButtonElement, boardLoader: (board: BoardData) => void) {
         this.cli = client;
         this._roomTable = roomTable;
@@ -519,15 +564,6 @@ export class MultiplayerUI {
 
         this._roomLinkCopy.classList.add("hidden");
         
-        let uid = localStorage.getItem("uid") as UID;
-        let ukey = localStorage.getItem("key") as UserKey;
-        this.cli.connect(() => this.cli.loginOrNewUser(uid, ukey, () => {
-            localStorage.setItem("uid", this.cli.user.uid);
-            localStorage.setItem("key", this.cli.user.key);
-            let rid = this.ridFromURL();
-            if (rid != "") this.cli.cmdJoinRoom(rid, this.onJoinRoom);
-        }));
-
         this.cli.onHostPromotion = () => {
             window.notif.customInfo("hostPromotion", "", "You were made host.");
         };

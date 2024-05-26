@@ -14,6 +14,7 @@ export interface BoardState {
     spangramFound: boolean;
     spangramCoords: number[][];
     wordsToGetHint: number;
+    currentGuess: number[][];
 }
 
 export interface BoardSummary {

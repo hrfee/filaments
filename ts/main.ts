@@ -20,7 +20,7 @@ const GET_HINT = "Get hint";
 
 const SELECT_ANIMATION = "animate-select";
 const SELECT_DURATION_MS = 300; // Ensure value in tailwind.config.js matches!
-const HIGHLIGHT_STEP_DURATION = 40;
+export const HIGHLIGHT_STEP_DURATION = 40;
 
 class MessageBox {
     private _el: HTMLElement;
@@ -126,7 +126,8 @@ class GameBoard {
                 themeWordsFound: this._themeWordsFound,
                 spangramFound: this._spangramFound,
                 spangramCoords: this._spangramCoords,
-                wordsToGetHint: this._wordsRemainingForHint
+                wordsToGetHint: this._wordsRemainingForHint,
+                currentGuess: this._selected
             };
         }
         this._m.cli.onBoardStateThemeWord = (w: string) => {
@@ -160,6 +161,7 @@ class GameBoard {
         this._reloadBoard(board);
 
         this.render();
+        this._m.connect();
         // console.log("Grid:", this._grid);
     }
 
