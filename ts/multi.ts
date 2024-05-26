@@ -227,7 +227,7 @@ export class MultiplayerClient {
                     break;
                 }
                 case iPing: {
-                    console.log("Ping successful.");
+                    // console.log("Ping successful.");
                     break;
                 }
                 default:
@@ -475,7 +475,7 @@ export class MultiplayerClient {
 
     processCurrentGuess = (args: string[]) => {
         const coords = this.processIncomingCoords(args);
-        console.log("got coords", coords);
+        // console.log("got coords", coords);
         let i = 0; 
         const addLoop = () => {
             this.onGuess(coords[i][1], coords[i][0]);
@@ -577,7 +577,7 @@ export class MultiplayerUI {
         };
 
         this.cli.onBoardReceived = () => {
-            console.log("board:", this.cli.room.board, "host:", this.cli.host);
+            // console.log("board:", this.cli.room.board, "host:", this.cli.host);
             if (this.cli.room.board == "" && this.cli.host) {
                 this.cli.cmdSetBoard(this.board);
             } else if (!this.cli.host) {

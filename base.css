@@ -22,7 +22,7 @@
     position: relative;
 }
 
-.char .inner, #messagebox {
+.char .inner, #messagebox, #guess {
     animation-iteration-count: 1 !important;
 }
 

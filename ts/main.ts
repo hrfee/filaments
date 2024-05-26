@@ -117,8 +117,8 @@ class GameBoard {
             this._addToGuess(el, x, y, false, false, true);
         };
         this._m.cli.onEndGuess = () => {
-            this._endGuess(true);
-            this.renderGuess();
+            const wasCorrect = this._endGuess(true);
+            this.renderGuess(!wasCorrect);
         };
         this._m.cli.onHintUsed = () => this._useHint(true);
         this._m.cli.onBoardRequest = (): BoardState => {
@@ -311,7 +311,6 @@ class GameBoard {
         } else if (validity == 1) {
             this.append(x, y, el);
         }
-        this.renderGuess();
     }
 
     private _deselect(el: HTMLElement, x: number, y: number, inclusive: boolean = true) {
@@ -333,9 +332,10 @@ class GameBoard {
             }
         }
         this._selected = newSelected;
+        this.renderGuess();
     };
 
-    private _clear(keepHints = true, keepConnectors = false) {
+    private _clear(keepHints = true, keepConnectors = false, wrongGuess: boolean = false) {
         // console.log("clear!");
         for (let i = 0; i < this._selected.length; i++) {
             let yx = this._selected[i];
@@ -348,7 +348,7 @@ class GameBoard {
             }
         }
         this._selected = [];
-        this.renderGuess();
+        this.renderGuess(wrongGuess);
     };
 
     // 2: user clicked the last char, confirming their guess. 0: previous symbol in current word, 1 = valid next word, -1 = not valid at all.
@@ -437,9 +437,10 @@ class GameBoard {
             this.addConnector(el, [y, x], this._selected[this._selected.length-2]);
         }
         this.animateSelected(el);
+        this.renderGuess();
     }
 
-    private _endGuess = (remote: boolean = false) => {
+    private _endGuess = (remote: boolean = false): boolean => {
         // console.log("endGuess");
         if (!remote) this._m.cli.cmdEndGuess();
         this._formingGuess = false;
@@ -454,7 +455,7 @@ class GameBoard {
             } else {
                 this._mb.msg("Already done");
             }
-            this._clear();
+            this._clear(true, false, true);
             this.updateWordCount();
         } else if (guessValidity == 2) {
             this._mb.msg("Nice!", "var(--color-valid)");
@@ -463,7 +464,7 @@ class GameBoard {
             this._mb.msg("Spangram!", "var(--color-spangram)");
             this.selectSpangramByCoords(this._selected);
         } else {
-            this._clear();
+            this._clear(true, false, true);
         }
     }
 
@@ -530,9 +531,21 @@ class GameBoard {
         `;
     }
 
-    renderGuess = () => {
+    renderGuess = (wrongGuess: boolean = false) => {
         if (this._selected.length == 0) {
-            this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
+            if (wrongGuess && this._guess.textContent != EMPTY_GUESS) {
+                const subEl = document.createElement("div");
+                subEl.classList.add("animate-nod");
+                subEl.onanimationend = () => {
+                    subEl.classList.remove("animate-nod");
+                    this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
+                    subEl.onanimationend = () => {};
+                };
+                subEl.textContent = this._guess.textContent;
+                this._guess.replaceChildren(subEl);
+            } else {
+                this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
+            }
         } else if (this._selected.length == 1) {
             const n = this._collectGuess();
             this._guess.innerHTML = `<div class="animate-slide-up">${n}</div>`;

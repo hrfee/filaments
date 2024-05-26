@@ -74,6 +74,26 @@ module.exports = {
                       opacity: '0',
                       transform: 'translateY(-50%)'
                   }
+              },
+              'nod': {
+                  '0%': {
+                      transform: 'translateX(0%)'
+                  },
+                  "20%": {
+                      transform: "translateX(-0.5rem)"
+                  },
+                  "40%": {
+                      transform: "translateX(0.5rem)"
+                  },
+                  "60%": {
+                      transform: "translateX(-0.5rem)"
+                  },
+                  "80%": {
+                      transform: "translateX(0.5rem)"
+                  },
+                  '100%': {
+                      transform: 'translateX(0%)'
+                  }
               }
           },
           animation: {
@@ -83,7 +103,8 @@ module.exports = {
               'slide-out': 'slide-out 0.2s cubic-bezier(.08,.52,.01,.98)',
               'select': 'pulsate 0.3s cubic-bezier(.08,.52,.01,.98)',
               'slide-up': 'slide-up 0.2s cubic-bezier(.08,.52,.01,.98)',
-              'slide-down': 'slide-down 0.2s cubic-bezier(.08,.52,.01,.98)'
+              'slide-down': 'slide-down 0.2s cubic-bezier(.08,.52,.01,.98)',
+              'nod': 'nod 0.5s cubic-bezier(.08,.52,.01,.98)'
           },
           colors: {
               neutral: colors.slate,
