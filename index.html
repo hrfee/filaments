@@ -40,13 +40,13 @@
             </div>
         </div>
         <div id="modal-nyt" class="modal">
-            <div class="relative mx-auto my-[10%] w-4/5 lg:w-2/3 content card sectioned p-0">
+            <div class="relative mx-auto my-[10%] w-4/5 lg:w-2/3 content card ~neutral sectioned p-0">
                 <section class="p-4">
                     <span class="heading">Boards<span class="modal-close">&times;</span></span>
                     <label class="flex flex-row my-2" for="nyt-specific-input">Specific Date</label>
                     <div class="flex flex-row gap-2 my-2" id="nyt-specific">
                         <input type="text" id="nyt-specific-input" class="field ~neutral" placeholder="YYYY-MM-DD"></input>
-                        <button class="button ~info @low">Download</button>
+                        <button class="button ~info @high">Download</button>
                     </div>
                     <p class="support">Note: Future boards might work too!</p>
                     <!-- <div class="overflow-x-auto">
@@ -78,15 +78,15 @@
                     <div class="flex flex-col-reverse sm:flex-row justify-center gap-4">
                         <div class="flex flex-col justify-center gap-4">
                             <div class="card ~neutral @low bg-transparent">
-                                <div id="messagebox" class="text-center font-bold text-2xl h-8"></div>
+                                <div id="messagebox" class="text-center font-bold text-2xl h-8 handwriting"></div>
                             </div>
-                            <div class="card ~netural @low">
-                                <p class="supra text-center">Today's Clue</p>
-                                <div class="font-bold text-xl text-center" id="clue"></div>
+                            <div class="card ~neutral @low">
+                                <p class="text-sm uppercase text-center">Today's Clue</p>
+                                <div class="font-bold text-xl text-center handwriting" id="clue"></div>
                             </div>
-                            <div class="card ~netural @low">
+                            <div class="card ~neutral @low">
                                 <p id="found-text" class="text-center"></p>
-                                <button class="button ~info @low font-bold overflow-hidden w-100 my-2" id="hint-button"></button>
+                                <button class="button ~neutral @low font-bold overflow-hidden w-100 my-2" id="hint-button"></button>
                             </div>
                             <div class="flex flex-row gap-2">
                                 <button class="button ~neutral @low flex flex-col w-1/3" id="load-file">
@@ -102,12 +102,12 @@
                                     <div class="font-bold">Multiplayer</div>
                                     <div class="support" id="room-code"></div>
                                 </button>
-                                <button class="button ~info @low w-1/4 hidden" title="Copy room link" id="copy-room-link">
+                                <button class="button ~info @high w-1/4 hidden" title="Copy room link" id="copy-room-link">
                                     <i class="ri-file-copy-line"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="flex flex-row select-none justify-center touch-none" id="board"></div>
+                        <div class="flex flex-row select-none justify-center touch-none handwriting" id="board"></div>
                     </div>
                 </section>
                 <section class="section ~info text-xs font-extralight italic">
@@ -115,7 +115,7 @@
                     <p>Boards listed in "NYT Boards" are downloaded and cached by the multiplayer server.</p>
                     <p>Source code for site and server available on <a class="underline" href="https://github.com/hrfee/filaments">GitHub</a>.</p>
                     <p>Contact: <a class="underline" aria-label="email" href="mailto:hrfee@hrfee.dev" target="_blank">hrfee@hrfee.dev</a>.</p>
-                    <p><a class="underline" href="https://github.com/hrfee/filaments/blob/main/LICENSE">Available under the MIT License.</a> <a class="underline" href="https://openfontlicense.org/open-font-license-official-text/">Font "Hanken Grotesk" available under SIL OFL 1.1 License.</a></p>
+                    <p><a class="underline" href="https://github.com/hrfee/filaments/blob/main/LICENSE">Available under the MIT License.</a> Fonts <a class="underline" href="https://github.com/marcologous/hanken-grotesk">"Hanken Grotesk"</a> and <a class="underline" href="https://github.com/xmindltd/nevermind/blob/master/LICENSE">"NeverMind Hand"</a> available under SIL OFL 1.1 License.</p>
                 </section>
             </div>
             </div>

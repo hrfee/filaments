@@ -1,5 +1,6 @@
 @import "css/base.css";
 @import "css/modal.css";
+@import "theme.css";
 
 :root {
     --c-1: #ffe3ef;
@@ -51,7 +52,7 @@
     background-color: var(--color-spangram);
 }
 
-.button.\~info.\@low .progress {
+.button .progress {
     height: 150%;
     position: absolute;
     left: 0;

@@ -610,7 +610,7 @@ export class MultiplayerUI {
                 tr.innerHTML = `
                     <td class="font-mono px-0">${rid}</td>
                     <td class="px-0">${this.cli.roomList[rid]}</td>
-                    <td class="px-0"><button class="button ~info @low room-join">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button></td>
+                    <td class="px-0"><button class="button ~${this.cli.room.rid == rid ? "critical" : "positive"} @high room-join handwriting">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button></td>
                 `;
                 const joinButton = tr.querySelector("button.room-join") as HTMLButtonElement;
                 joinButton.onclick = () => {

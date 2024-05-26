@@ -51,7 +51,8 @@ export const defaultBoard: BoardData = {
         "BOAR",
         "EAR",
         "ALRIGHT",
-        "LONE"
+        "LONE",
+        "OK"
     ],
     "themeCoords": {
         "THIS": [[0, 0], [0, 1], [0, 2], [0, 3]],

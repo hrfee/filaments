@@ -1,0 +1,192 @@
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-Medium.woff2') format('woff2'),
+        url('../fonts/NeverMindHand-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-DemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NeverMind Hand';
+    src: url('../fonts/NeverMindHand-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --black: #000000;
+    --bthickness: 0.15rem;
+    --bthickness-sm: 0.12rem;
+    font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    /* font-family: 'NeverMind Hand', 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; */
+    
+    --connector-width: .52rem !important;
+    
+    --bcolor-valid: #5096dd;
+    --bcolor-spangram: #f4df71;
+    --bcolor-selected: #92969b;
+}
+
+body {
+    background-color: #f6eee3 !important;
+}
+
+.\~neutral, .\~neutral section:not(.\~info) {
+    --color-muted-low: rgba(255, 255, 255, 50%) !important;
+    --color-fill-low: rgba(255, 255, 255, 20%) !important;
+}
+
+.modal .card.\~neutral {
+    background-color: #fbf8f4 !important;
+}
+
+.button:hover:not([disabled]):not(.field):not(\@high),
+.button:focus:not([disabled]):not(.field):not(\@high) {
+    filter: invert(0.2) brightness(0.8) !important;
+}
+
+.handwriting {
+    font-family: 'NeverMind Hand', 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.card {
+    border-radius: 0.8rem !important;
+    border: var(--bthickness) solid var(--black) !important;
+}
+
+.button {
+    border-radius: 0.4rem !important;
+    border: var(--bthickness-sm) solid var(--black) !important;
+}
+
+.char .connector {
+    opacity: 1 !important;
+}
+
+.char .selected {
+    border: 0.15rem solid var(--bcolor-selected) !important;
+}
+
+.char .selected::after {
+    border: 0.10rem solid var(--bcolor-selected);
+}
+
+.char.selected .connector {
+    background-color: var(--bcolor-selected) !important;
+}
+
+.char .valid {
+    border: 0.15rem solid var(--bcolor-valid) !important;
+    color: #205799 !important;
+}
+
+.char .valid::after {
+    border: 0.10rem solid var(--bcolor-valid);
+}
+
+.char.valid .connector {
+    background-color: var(--bcolor-valid) !important;
+}
+
+.char .spangram {
+    border: 0.15rem solid var(--bcolor-spangram) !important;
+    color: #fdf9e5 !important;
+}
+
+.char .spangram::after {
+    border: 0.10rem solid var(--bcolor-spangram);
+}
+
+.char.spangram .connector {
+    background-color: var(--bcolor-spangram) !important;
+}
+
+.char .valid::after,
+.char .selected::after,
+.char .spangram::after {
+    content: '';
+    display: block;
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.char .s1::after {
+    width: 110%;
+    height: 115%;
+}
+.char .s2::after {
+    width: 115%;
+    height: 110%;
+}
+.char .s3::after {
+    width: 112%;
+    height: 118%;
+}
+.char .s4::after {
+    width: 118%;
+    height: 112%;
+}
+.char .s5::after {
+    width: 110%;
+    height: 102%;
+}
+.char .s6::after {
+    width: 102%;
+    height: 110%;
+}
+.char .s7::after {
+    width: 116%;
+    height: 109%;
+}
+.char .s8::after {
+    width: 109%;
+    height: 116%;
+}
+
+.button .progress {
+    background-color: var(--black) !important;
+    opacity: 1 !important;
+}

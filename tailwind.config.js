@@ -7,6 +7,9 @@ module.exports = {
   important: true,
   theme: {
       extend: {
+          transitionProperty: {
+              "width": "width"
+          },
           keyframes: {
               'fade-in': {
                   '0%': {
@@ -94,6 +97,12 @@ module.exports = {
                   '100%': {
                       transform: 'translateX(0%)'
                   }
+              },
+              "ping2": {
+                  "75%, 100%": {
+                      transform: "scale(1.5)",
+                      opacity: "0"
+                  }
               }
           },
           animation: {
@@ -104,7 +113,8 @@ module.exports = {
               'select': 'pulsate 0.3s cubic-bezier(.08,.52,.01,.98)',
               'slide-up': 'slide-up 0.2s cubic-bezier(.08,.52,.01,.98)',
               'slide-down': 'slide-down 0.2s cubic-bezier(.08,.52,.01,.98)',
-              'nod': 'nod 0.5s cubic-bezier(.08,.52,.01,.98)'
+              'nod': 'nod 0.5s cubic-bezier(.08,.52,.01,.98)',
+              'ping2': 'ping2 1s cubic-bezier(.01,.66,.2,.98)'
           },
           colors: {
               neutral: colors.slate,

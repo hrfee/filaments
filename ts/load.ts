@@ -87,14 +87,14 @@ export class BoardLoader {
         <td class="pr-0"><button class="button ~info @low download-board">Download</button></td>
         `; */
         let s = document.createElement("div");
-        s.classList.add("card", "flex", "flex-col", "items-center", "gap-2");
+        s.classList.add("card", "~neutral", "@low", "flex", "flex-col", "items-center", "gap-2");
         s.innerHTML = `
             <div class="support">${summary.date}</div>
-            <div class="font-bold text-xl text-center">${summary.clue}</div>
+            <div class="font-bold text-xl text-center handwriting">${summary.clue}</div>
             <div class="text-center" title="Editor: ${summary.editor}">
                 ${summary.editor}
             </div>
-            <button class="button ~info @low download-board">Download</button>
+            <button class="button ~info @high download-board">Download</button>
         `;
         const dlButton = s.querySelector("button.download-board") as HTMLButtonElement;
         dlButton.onclick = () => {

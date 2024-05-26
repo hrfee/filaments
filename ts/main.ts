@@ -17,6 +17,8 @@ window.notif = new notificationBox(document.getElementById("notification-box") a
 
 const EMPTY_GUESS = "_ _ _ _ _ _";
 const GET_HINT = "Get hint";
+const SKEW_MAX_ABS_DEG = 2; // Between -(this) and (this)deg
+const ROT_MAX_ABS_DEG = 3; // Between -(this) and (this)deg
 
 const SELECT_ANIMATION = "animate-select";
 const SELECT_DURATION_MS = 300; // Ensure value in tailwind.config.js matches!
@@ -26,7 +28,7 @@ class MessageBox {
     private _el: HTMLElement;
     private _timeout: number;
     private _animate: string;
-    constructor(el: HTMLElement, animationClass = "animate-ping", defaultTimeout = 2000) {
+    constructor(el: HTMLElement, animationClass = "animate-ping2", defaultTimeout = 1800) {
         this._el = el;
         this._timeout = defaultTimeout;
         this._animate = animationClass;
@@ -94,6 +96,10 @@ class GameBoard {
         this._mb = new MessageBox(messageBox);
         this._foundText = wordCount;
         this._hintButton = hintButton as HTMLButtonElement;
+        this._hintButton.innerHTML = `
+        <div class="progress transition-width" style="width: 0%;"></div>
+        <div class="mix-blend-difference text-slate-50 gethint"></div>
+        `;
 
         this._hintButton.onclick = () => this._useHint(false);
 
@@ -192,8 +198,20 @@ class GameBoard {
         this.render();
     };
 
+    private randAngle(max_abs_deg: number): number {
+        return (Math.random() - 0.5) * 2 * max_abs_deg;
+    }
+
+    private randTransform = () => {
+        return `skew(${this.randAngle(SKEW_MAX_ABS_DEG)}deg) rotate(${this.randAngle(ROT_MAX_ABS_DEG)}deg)`;
+    }
+
+    private randEllipse = () => {
+        return `s${Math.floor(Math.random() * (8)) + 1}`;
+    };
+
     private resetChar = (el: HTMLElement, x: number, y: number) => {
-        let innerHTML = `<div class="inner z-10 w-full h-full flex justify-center items-center`;
+        let innerHTML = `<div style="transform: ${this.randTransform()};" class="inner z-10 w-full h-full flex justify-center items-center ${this.randEllipse()}`;
         if (el.classList.contains("valid")) innerHTML += " valid";
         if (el.classList.contains("selected")) innerHTML += " selected";
         if (el.classList.contains("hinted")) innerHTML += " hinted";
@@ -204,7 +222,10 @@ class GameBoard {
 
     private addClass(el: HTMLElement, c: string) {
         el.classList.add(c);
-        el.querySelector(".inner").classList.add(c);
+        const inner = el.querySelector(".inner") as HTMLElement;
+        inner.classList.add(c, this.randEllipse());
+        inner.style.transform = this.randTransform();
+        
     };
     private rmClass(el: HTMLElement, c: string) {
         el.classList.remove(c);
@@ -449,13 +470,15 @@ class GameBoard {
         let word = this._collectGuess();
         let guessValidity = this.validateGuess(word);
         if (guessValidity == 1) {
+            let wrong = false;
             if (!this._wordsFound.includes(word)) {
                 this._wordsFound.push(word);
                 this._wordsRemainingForHint -= 1;
             } else {
                 this._mb.msg("Already done");
+                wrong = true;
             }
-            this._clear(true, false, true);
+            this._clear(true, false, wrong);
             this.updateWordCount();
         } else if (guessValidity == 2) {
             this._mb.msg("Nice!", "var(--color-valid)");
@@ -525,10 +548,10 @@ class GameBoard {
             this._hintButton.title = `${this._wordsRemainingForHint} word${this._wordsRemainingForHint != 1 ? "s" : ""} remaining`;
             this._hintButton.disabled = true;
         } else { this._hintButton.disabled = false; }
-        this._hintButton.innerHTML = `
-            <div class="progress" style="width: ${fillPct}%;"></div>
-            ${textContent}
-        `;
+        const pBar = this._hintButton.querySelector(".progress") as HTMLElement;
+        const ghText = this._hintButton.querySelector(".gethint") as HTMLElement;
+        pBar.style.width = `${fillPct}%`;
+        ghText.textContent = textContent;
     }
 
     renderGuess = (wrongGuess: boolean = false) => {
@@ -538,8 +561,10 @@ class GameBoard {
                 subEl.classList.add("animate-nod");
                 subEl.onanimationend = () => {
                     subEl.classList.remove("animate-nod");
-                    this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
                     subEl.onanimationend = () => {};
+                    setTimeout(() => {
+                        this._guess.innerHTML = `<div class="animate-slide-up">${EMPTY_GUESS}</div>`;
+                    }, HIGHLIGHT_STEP_DURATION);
                 };
                 subEl.textContent = this._guess.textContent;
                 this._guess.replaceChildren(subEl);
