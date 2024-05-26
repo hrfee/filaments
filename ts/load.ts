@@ -91,7 +91,7 @@ export class BoardLoader {
         s.innerHTML = `
             <div class="support">${summary.date}</div>
             <div class="font-bold text-xl text-center">${summary.clue}</div>
-            <div title="Editor: ${summary.editor}">
+            <div class="text-center" title="Editor: ${summary.editor}">
                 ${summary.editor}
             </div>
             <button class="button ~info @low download-board">Download</button>

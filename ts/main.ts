@@ -300,7 +300,7 @@ class GameBoard {
         let validity = this.validNextChar(el, x, y);
         // console.log("clicked", el.textContent, `at y,x ${y},${x}, validity: ${validity}, end: ${end}`);
         if (validity == 2 || end) {
-            this._endGuess();
+            if (!remote) this._endGuess(remote);
         } else if (validity == 0) {
             this._deselect(el, x, y, !drag);
         } else if (validity == -1) {
