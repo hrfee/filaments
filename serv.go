@@ -73,10 +73,11 @@ type UserKey string
 type RID string
 
 type User struct {
-	uid  UID
-	key  UserKey
-	nick string
-	room RID
+	uid        UID
+	key        UserKey
+	nick       string
+	room       RID
+	lastOnline time.Time
 }
 
 type Room struct {
@@ -120,14 +121,38 @@ func (g *GameServer) DeleteRoom(rid RID) {
 	delete(g.rooms, rid)
 }
 
+func (g *GameServer) runDaemon() {
+	for {
+		select {
+		case <-g.daemonCtrl:
+			g.daemonCtrl <- "Finished"
+			return
+		case <-time.After(g.daemonPeriod):
+			break
+		}
+		log.Printf("Clearing old users")
+		n := time.Now()
+		for _, u := range g.users {
+			if n.Sub(u.lastOnline) > g.userLifetime {
+				log.Printf("Deleting \"%s\"\n", u.uid)
+				delete(g.users, u.uid)
+			}
+		}
+	}
+}
+
 type GameServer struct {
-	upgrader    websocket.Upgrader
-	addr        string
-	port        int
-	users       map[UID]User
-	rooms       map[RID]Room
-	connections map[UID](chan CrossSessionMessage)
-	boards      *BoardCache
+	upgrader       websocket.Upgrader
+	addr           string
+	port           int
+	users          map[UID]User
+	rooms          map[RID]Room
+	connections    map[UID](chan CrossSessionMessage)
+	boards         *BoardCache
+	daemonCtrl     chan string
+	daemonInterval time.Duration
+	daemonPeriod   time.Duration
+	userLifetime   time.Duration
 }
 
 type MsgType int
@@ -351,6 +376,8 @@ func (g *GameServer) auth(args []string) *User {
 	// Trim newline is auth things are the only argument
 	key := UserKey(strings.TrimSuffix(args[2], "\n"))
 	if u, ok := g.users[UID(args[1])]; ok && u.key == key {
+		u.lastOnline = time.Now()
+		g.users[u.uid] = u
 		return &u
 	}
 	return nil
@@ -649,16 +676,19 @@ func (g *GameServer) cmdDownloadBoard(c *websocket.Conn, args []string) {
 	g.resp(c, oGetBoard, board)
 }
 
-func NewServer(address string, port int) *GameServer {
+func NewServer(address string, port int, userLifetime time.Duration) *GameServer {
 	g := GameServer{
-		upgrader:    websocket.Upgrader{},
-		addr:        address,
-		port:        port,
-		users:       map[UID]User{},
-		rooms:       map[RID]Room{},
-		connections: map[UID](chan CrossSessionMessage){},
-		boards:      NewBoardCache(),
+		upgrader:       websocket.Upgrader{},
+		addr:           address,
+		port:           port,
+		users:          map[UID]User{},
+		rooms:          map[RID]Room{},
+		connections:    map[UID](chan CrossSessionMessage){},
+		boards:         NewBoardCache(),
+		userLifetime:   userLifetime,
+		daemonInterval: 20 * time.Minute,
 	}
+	g.daemonPeriod = g.daemonInterval
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	g.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	return &g
@@ -777,6 +807,7 @@ func main() {
 			log.Fatalf("Invalid port: \"%s\"\n", os.Args[2])
 		}
 	}
-	g := NewServer(addr, port)
+	g := NewServer(addr, port, 20*time.Minute)
+	go g.runDaemon()
 	g.Serve()
 }
