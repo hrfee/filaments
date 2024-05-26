@@ -508,8 +508,10 @@ export class MultiplayerUI {
         this.cli.cmdGetBoard();
         this._roomCodeArea.textContent = "Room: " + this.cli.room.rid;
         this._roomLinkCopy.classList.remove("hidden");
+        let url = this.urlFromRID(this.cli.room.rid);
+        window.history.pushState({}, "", url);
+
         this._roomLinkCopy.onclick = () => {
-            let url = this.urlFromRID(this.cli.room.rid);
             toClipboard(url);
             this._roomLinkCopy.classList.add("~positive");
             this._roomLinkCopy.classList.remove("~info");
@@ -523,6 +525,7 @@ export class MultiplayerUI {
     }
 
     onLeaveRoom = () => {
+        window.history.pushState({}, "", this.getBaseURL());
         this._roomCodeArea.textContent = ``;
         this._roomLinkCopy.classList.add("hidden");
         this._modal.close();
@@ -540,6 +543,11 @@ export class MultiplayerUI {
         if (url.at(url.length-1) != "/") url += "/";
         url += "?room=" + rid;
         return url;
+    };
+
+    getBaseURL = (): string => {
+        let s = window.location.href.split("?room=");
+        return s[0];
     };
 
     connect = () => {
