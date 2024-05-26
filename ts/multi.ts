@@ -25,6 +25,8 @@ interface Room {
 
 const auth = (u: User) => `${u.uid} ${u.key}`;
 
+const iPing = "PONG\n";
+const oPing = () => "PING\n";
 const oHello = () => "HELLO\n";
 const oHelloExistingUser = (u: User) => `HELLO ${auth(u)}\n`;
 const oNewRoom = (u: User) => `NEWROOM ${auth(u)}\n`;
@@ -84,6 +86,7 @@ export class MultiplayerClient {
     room: Room = {rid: "", board: ""};
     host: boolean;
     private _ws: WebSocket;
+    private _connected: boolean = false;
     private _roomToJoin: RID;
     private _successFunc: () => void = () => {};
     private _failFunc: () => void = () => {};
@@ -115,9 +118,15 @@ export class MultiplayerClient {
 
     connect = (then: () => void = () => {}) => {
         this._ws = new WebSocket(this._url);
+        this._ws.onclose= 
         this._ws.onerror = () => {
             window.notif.customError("errorConnect", "Couldn't connect to server, multiplayer & board download unavailable.");
+            this._connected = false;
         }
+        this._ws.onclose = () => {
+            window.notif.customError("disconnected", "Disconnected from server, refresh the page to reconnect.");
+            this._connected = false;
+        };
         this._ws.onmessage = (e) => {
             // Split here, unlike go, discards leftover stuff when the limit (4) is reached, instead of including it w/ the last element.
             // so instead we use a custom one.
@@ -203,12 +212,25 @@ export class MultiplayerClient {
                     this._invalidFunc();
                     break;
                 }
+                case iPing: {
+                    console.log("Ping successful.");
+                    break;
+                }
                 default:
                     console.log("Got response:", e.data);
             }
         }
-        this._ws.onopen = then;
+        this._ws.onopen = () => {
+            this._connected = true;
+            this._ping();
+            then();
+        };
     }
+
+    private _ping = () => {
+        this._ws.send(oPing());
+        if (this._connected) setTimeout(this._ping, 2 * 60000);
+    };
 
     loginOrNewUser = (uid: UID, key: UserKey, then: () => void = () => {}) => {
         this.cmdHelloExistingUser(uid, key, () => {
@@ -430,15 +452,6 @@ export class MultiplayerClient {
     }
 }
 
-export const test = () => {
-    let b = new MultiplayerClient("ws://0.0.0.0:8081");
-    b.cmdHello();
-    return b;
-    // b.cmdNewRoom();
-    // b.cmdSetBoard("this is a test!");
-    // b.cmdGetBoard();
-};
-
 interface window extends Window {
     notif: notificationBox;
 }
@@ -506,8 +519,8 @@ export class MultiplayerUI {
 
         this._roomLinkCopy.classList.add("hidden");
         
-        let uid = localStorage.getItem("uid");
-        let ukey = localStorage.getItem("key");
+        let uid = localStorage.getItem("uid") as UID;
+        let ukey = localStorage.getItem("key") as UserKey;
         this.cli.connect(() => this.cli.loginOrNewUser(uid, ukey, () => {
             localStorage.setItem("uid", this.cli.user.uid);
             localStorage.setItem("key", this.cli.user.key);

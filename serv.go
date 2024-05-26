@@ -24,6 +24,8 @@ type Message string
 
 const (
 	// Inputs (i...) without a \n are those which include args.
+	iPing                      = "PING\n"
+	oPing                      = "PONG\n"
 	iHello             Message = "HELLO\n"
 	iHelloExistingUser         = "HELLO"
 	oHello                     = "HELLO %s %s\n" // UID and Key
@@ -165,7 +167,7 @@ func (g *GameServer) CrossSessionMonitor(c *websocket.Conn, uid UID) {
 			// log.Printf("Forward requested to %s: \"%s\"\n", uid, msg.data)
 			g.resp(c, msg.data)
 		case mNewHost:
-			// log.Printf("Host being assigned to \"%s\"", uid)
+			// log.Printf("Host being assigned to \"%s\"\n", uid)
 			g.resp(c, oNewHost)
 		case mPlayerJoined:
 			g.resp(c, oPlayerJoined, msg.src)
@@ -284,7 +286,7 @@ func (g *GameServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("\"%s\": GETBOARD\n", uid)
 			g.cmdGetBoard(c, components)
 		case iBoardSummaries:
-			log.Printf("\"%s\": BOARDSUMMARIES", uid)
+			log.Printf("\"%s\": BOARDSUMMARIES\n", uid)
 			g.cmdBoardSummaries(c)
 		case iGuess:
 			log.Printf("\"%s\": GUESS\n", uid)
@@ -296,15 +298,18 @@ func (g *GameServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("\"%s\": HINT\n", uid)
 			g.cmdHint(c, components)
 		case iForward:
-			log.Printf("\"%s\": FORWARD", uid)
+			log.Printf("\"%s\": FORWARD\n", uid)
 			g.cmdForward(c, components)
 		case iGetState:
-			log.Printf("\"%s\": GETSTATE", uid)
+			log.Printf("\"%s\": GETSTATE\n", uid)
 			g.cmdGetState(c, components)
 		case iDownloadBoard:
-			log.Printf("\"%s\": DLBOARD", uid)
+			log.Printf("\"%s\": DLBOARD\n", uid)
 			g.cmdDownloadBoard(c, components)
+		case iPing:
+			g.resp(c, oPing)
 		default:
+			log.Printf("Got malformed msg \"%s\"\n", inp)
 			g.resp(c, oInvalid)
 		}
 	}
@@ -654,6 +659,7 @@ func NewServer(address string, port int) *GameServer {
 		connections: map[UID](chan CrossSessionMessage){},
 		boards:      NewBoardCache(),
 	}
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	g.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	return &g
 }
@@ -661,7 +667,7 @@ func NewServer(address string, port int) *GameServer {
 func (g *GameServer) Serve() {
 	http.Handle("/", g)
 	fullAddress := fmt.Sprintf("%s:%d", g.addr, g.port)
-	log.Printf("Starting server @ \"%s\"", fullAddress)
+	log.Printf("Starting server @ \"%s\"\n", fullAddress)
 	log.Fatal(http.ListenAndServe(fullAddress, nil))
 }
 
