@@ -601,7 +601,7 @@ export class MultiplayerUI {
             this._roomTable.textContent = ``;
             if (Object.keys(this.cli.roomList).length == 0) {
                 this._roomTable.innerHTML = `
-                <div class="flex flex-row justify-between">No rooms. Create a new one below.</div>
+                <div class="flex flex-row justify-between my-2">No rooms. Create a new one below.</div>
                 `;
                 return;
             }
@@ -610,7 +610,7 @@ export class MultiplayerUI {
                 tr.innerHTML = `
                     <td class="font-mono px-0">${rid}</td>
                     <td class="px-0">${this.cli.roomList[rid]}</td>
-                    <td class="px-0"><button class="button ~${this.cli.room.rid == rid ? "critical" : "positive"} @high room-join handwriting">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button></td>
+                    <td class="px-0 text-right"><button class="button ~${this.cli.room.rid == rid ? "critical" : "positive"} @high room-join handwriting">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button></td>
                 `;
                 const joinButton = tr.querySelector("button.room-join") as HTMLButtonElement;
                 joinButton.onclick = () => {

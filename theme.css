@@ -96,8 +96,20 @@ body {
     border: var(--bthickness) solid var(--black) !important;
 }
 
-.button {
+.button, input.field {
     border-radius: 0.4rem !important;
+    border: var(--bthickness-sm) solid var(--black) !important;
+}
+
+table thead, table tr {
+    border-bottom: 2px solid var(--black) !important;
+}
+
+/*table tr:last-child { 
+    border-bottom: none !important; 
+}*/
+
+aside.aside {
     border: var(--bthickness-sm) solid var(--black) !important;
 }
 
