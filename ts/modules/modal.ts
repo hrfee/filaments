@@ -21,6 +21,7 @@ export class Modal implements Modal {
         }
     }
     close = (event?: Event) => {
+        if (!this.modal.classList.contains("block")) return;
         if (event) {
             event.preventDefault();
         }

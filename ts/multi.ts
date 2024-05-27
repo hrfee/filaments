@@ -22,6 +22,14 @@ interface User {
 interface Room {
     rid: RID;
     board: string;
+    nick: string;
+    password: string;
+}
+
+interface RoomDescriptor {
+    nick: string;
+    password: boolean;
+    playerCount: number;
 }
 
 const auth = (u: User) => `${u.uid} ${u.key}`;
@@ -30,9 +38,9 @@ const iPing = "PONG\n";
 const oPing = () => "PING\n";
 const oHello = () => "HELLO\n";
 const oHelloExistingUser = (u: User) => `HELLO ${auth(u)}\n`;
-const oNewRoom = (u: User) => `NEWROOM ${auth(u)}\n`;
+const oNewRoom = (u: User, b64Name: string = "", b64Password: string = "") => `NEWROOM ${auth(u)} ${b64Name}${b64Password != "" ? " " + b64Password : ""}\n`;
 const oListRooms = () => "ROOMS\n";
-const oJoinRoom = (u: User, r: RID) => `JOIN ${auth(u)} ${r}\n`;
+const oJoinRoom = (u: User, r: RID, b64Password: string = "") => `JOIN ${auth(u)} ${r}${b64Password != "" ? " " + b64Password : ""}\n`;
 const oLeaveRoom = (u: User) => `LEAVE ${auth(u)}\n`;
 const oSetBoard = (u: User, b64Board: string) => `SETBOARD ${auth(u)} ${b64Board}\n`;
 const oGetBoard = (u: User) => `BOARD ${auth(u)}\n`;
@@ -102,6 +110,8 @@ export class MultiplayerClient {
     private _failFunc: () => void = () => {};
     private _endFunc: () => void = () => {};
     private _invalidFunc: () => void = () => {};
+    private _roomJoinFunc: (success: boolean) => void = (success: boolean) => {};
+    private _newRoomFunc: (success: boolean) => void = (success: boolean) => {};
 
     onGuess: (x: number, y: number) => void = (x: number, y: number) => { console.log("Guessed", x, y); };
     onEndGuess: () => void = () => { console.log("Guess ended!"); };
@@ -118,7 +128,8 @@ export class MultiplayerClient {
 
     private _callBacks: { [s: string]: () => void } = {};
 
-    roomList: { [rid: RID]: number }; // RID to no. of occupants
+
+    roomList: { [rid: RID]: RoomDescriptor } = {}; // RID to no. of occupants
 
     constructor(url: string) {
         this._url = url;
@@ -291,43 +302,56 @@ export class MultiplayerClient {
         this._callBacks["HELLO"]();
     };
 
-    cmdNewRoom = (then: () => void = () => {}) => {
-        this._callBacks["NEWROOM"] = then;
-        this._ws.send(oNewRoom(this.user));
+    cmdNewRoom = (nickname: string = "", password: string = "", then: (success: boolean) => void = (success: boolean) => {}) => {
+        this._newRoomFunc = then;
+        this.room = { password: password } as Room;
+        this._ws.send(oNewRoom(this.user, unicodeB64Encode(nickname), unicodeB64Encode(password)));
     }
 
     respNewRoom = (args: string[]) => {
         console.log(`Created new room "${args[1]}"`);
-        this.cmdJoinRoom(args[1] as RID, () => {
+        this.cmdJoinRoom(args[1] as RID, this.room.password, (success: boolean) => {
             this.host = true;
-            this._callBacks["NEWROOM"]();
+            this._newRoomFunc(success);
         });
     }
 
-    cmdJoinRoom = (rid: RID, then: () => void = () => {}) => {
+    cmdJoinRoom = (rid: RID, password: string = "", then: (success: boolean) => void = () => {}) => {
         this.host = false;
-        this._callBacks["JOINROOM"] = then;
+        this._roomJoinFunc = then;
         this._roomToJoin = rid;
         this.room.rid = "";
         this.room.board = "";
+        this.room.password = password;
         this._successFunc = this.respJoinRoom;
-        this._ws.send(oJoinRoom(this.user, rid));
+        this._invalidFunc = () => {
+            this._roomJoinFunc(false);
+        };
+        this._failFunc = this._invalidFunc;
+
+        this._ws.send(oJoinRoom(this.user, rid, unicodeB64Encode(password)));
     }
 
     respJoinRoom = () => {
         this.user.room = this._roomToJoin;
+        let nick = "";
+        if (this._roomToJoin in this.roomList) {
+            nick = this.roomList[this._roomToJoin].nick;
+        }
         this.room = {
             rid: this._roomToJoin,
-            board: ""
+            board: "",
+            nick: nick,
+            password: this.room.password
         };
         console.log(`Joined room "${this.user.room}"`);
-        this._callBacks["JOINROOM"]();
+        this._roomJoinFunc(true);
     }
 
     cmdLeaveRoom = (then: () => void = () => {}) => {
         this._successFunc = () => {
             console.log("left room.");
-            this.room = {rid: "", board: ""};
+            this.room = {rid: "", board: "", nick: "", password: ""};
             then();
         };
         this._ws.send(oLeaveRoom(this.user));
@@ -344,7 +368,21 @@ export class MultiplayerClient {
     };
 
     respListRooms = (args: string[]) => {
-        this.roomList[args[1] as RID] = +(args[2]);
+        let nick = "";
+        let password = false;
+        if (args.length == 4) {
+            let nickPass = args[3].split(" ", 2);
+            nick = nickPass[0];
+            password = (nickPass.length > 1 && nickPass[1] == "PASSWORD");
+        } else if (args.length == 5) {
+            nick = args[3];
+            password = args[4] == "PASSWORD";
+        }
+        this.roomList[args[1] as RID] = {
+            playerCount: +(args[2]),
+            nick: nick == "NONE" ? "" : unicodeB64Decode(nick),
+            password: password
+        }
     };
 
     cmdSetBoard = (board: string, then: () => void = () => {}) => {
@@ -503,12 +541,17 @@ export class MultiplayerUI {
     private _roomButton: HTMLButtonElement;
     private _roomLinkCopy: HTMLButtonElement
     private _newRoomButton: HTMLButtonElement;
+    private _newRoomInputs: HTMLDivElement;
         
-    onJoinRoom = () => {
+    onJoinRoom = (success: boolean = false) => {
+        if (!success) {
+            window.notif.customError("failedJoin", "Couldn't join room.");
+            return;
+        }
         this.cli.cmdGetBoard();
         this._roomCodeArea.textContent = "Room: " + this.cli.room.rid;
         this._roomLinkCopy.classList.remove("hidden");
-        let url = this.urlFromRID(this.cli.room.rid);
+        let url = this.urlFromRID(this.cli.room.rid, unicodeB64Encode(this.cli.room.password));
         window.history.pushState({}, "", url);
 
         this._roomLinkCopy.onclick = () => {
@@ -533,15 +576,28 @@ export class MultiplayerUI {
     };
 
     ridFromURL = (): RID => {
-        let s = window.location.href.split("?room=");
-        if (s.length < 2) return ""
-        return s[s.length-1] as RID;
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("room") as RID;
+        /* let s = window.location.href.split("?room=");
+        if (s.length < 2) return "";
+        return s[s.length-1] as RID; */
     };
 
-    urlFromRID = (rid: RID): string => {
+    passwordFromURL = (): string => {
+        const urlParams = new URLSearchParams(window.location.search);
+        return unicodeB64Decode(urlParams.get("password"));
+        /* let s = window.location.href.split("&password=");
+        if (s.length < 2) return "";
+        return unicodeB64Decode(s[s.length-1]); */
+    };
+
+    urlFromRID = (rid: RID, b64Password: string = ""): string => {
         let url = window.location.href.split("?room=")[0];
         if (url.at(url.length-1) != "/") url += "/";
         url += "?room=" + rid;
+        if (b64Password != "") {
+            url += `&password=` + b64Password;
+        }
         return url;
     };
 
@@ -557,16 +613,18 @@ export class MultiplayerUI {
             localStorage.setItem("uid", this.cli.user.uid);
             localStorage.setItem("key", this.cli.user.key);
             let rid = this.ridFromURL();
-            if (rid != "") this.cli.cmdJoinRoom(rid, this.onJoinRoom);
+            let pw = this.passwordFromURL();
+            if (rid != "") this.cli.cmdJoinRoom(rid, pw, this.onJoinRoom);
         }));
     }
 
-    constructor(client: MultiplayerClient, modal: HTMLElement, roomTable: HTMLElement, roomCodeArea: HTMLElement, roomButton: HTMLButtonElement, roomLinkCopy: HTMLButtonElement, newRoomButton: HTMLButtonElement, boardLoader: (board: BoardData) => void) {
+    constructor(client: MultiplayerClient, modal: HTMLElement, roomTable: HTMLElement, roomCodeArea: HTMLElement, roomButton: HTMLButtonElement, roomLinkCopy: HTMLButtonElement, newRoomButton: HTMLButtonElement, newRoomInputs: HTMLDivElement, boardLoader: (board: BoardData) => void) {
         this.cli = client;
         this._roomTable = roomTable;
         this._roomCodeArea = roomCodeArea;
         this._roomButton = roomButton;
         this._newRoomButton = newRoomButton;
+        this._newRoomInputs = newRoomInputs;
         this._roomLinkCopy = roomLinkCopy;
         this._boardLoader = boardLoader;
 
@@ -606,29 +664,69 @@ export class MultiplayerUI {
                 return;
             }
             for (const rid in this.cli.roomList) {
+                let hasName = this.cli.roomList[rid].nick != "";
+                let descriptor = hasName ? this.cli.roomList[rid].nick : rid;
+                let lockIcon = "";
+                if (this.cli.roomList[rid].password) {
+                    lockIcon = `<i class="p-2 ri-lock-2-line"></i>`;
+                }
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td class="font-mono px-0">${rid}</td>
-                    <td class="px-0">${this.cli.roomList[rid]}</td>
-                    <td class="px-0 text-right"><button class="button ~${this.cli.room.rid == rid ? "critical" : "positive"} @high room-join handwriting">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button></td>
+                    <td class="${hasName ? "" : "font-mono"} px-0">${descriptor}${lockIcon}</td>
+                    <td class="px-0">${this.cli.roomList[rid].playerCount}</td>
+                    <td class="px-0 justify-end flex flex-row gap-2">
+                        <input type="password" class="field ~neutal hidden" placeholder="Password"></input>
+                        <button class="button ~${this.cli.room.rid == rid ? "critical" : "positive"} @high room-join handwriting">${this.cli.room.rid == rid ? LEAVE_ROOM : JOIN_ROOM}</button>
+                    </td>
                 `;
+                const pwInput = tr.querySelector("input[type=password]") as HTMLInputElement;
                 const joinButton = tr.querySelector("button.room-join") as HTMLButtonElement;
                 joinButton.onclick = () => {
                     if (this.cli.room.rid == rid) {
                         this.cli.cmdLeaveRoom(this.onLeaveRoom);
                     } else {
-                        this.cli.cmdJoinRoom(rid, this.onJoinRoom);
+                        if (this.cli.roomList[rid].password && (pwInput.value == "" || pwInput.classList.contains("hidden"))) {
+                            pwInput.classList.remove("hidden");
+                        } else {
+                            this.cli.cmdJoinRoom(rid, pwInput.value, this.onJoinRoom);
+                        }
                     }
                 };
                 this._roomTable.appendChild(tr);
             }
         });
         this._roomButton.onclick = this._modal.show;
-        this._newRoomButton.onclick = () => this.cli.cmdNewRoom(() => {
-            if (this.cli.room.rid != "") {
-                this.onJoinRoom();
-                window.notif.customSuccess("roomCreated", `Room "${this.cli.room.rid}" created.`);
+        this._newRoomButton.onclick = () => {
+            if (this._newRoomInputs.childElementCount == 0) {
+                const nameInput = document.createElement("input") as HTMLInputElement;
+                nameInput.type = "text";
+                nameInput.classList.add("field", "~neutral");
+                nameInput.placeholder = "Room Name";
+                const pwInput = document.createElement("input") as HTMLInputElement;
+                pwInput.type = "password";
+                pwInput.classList.add("field", "~neutral");
+                pwInput.placeholder = "Password (optional)";
+
+                this._newRoomInputs.appendChild(nameInput);
+                this._newRoomInputs.appendChild(pwInput);
+                this._newRoomButton.classList.add("~positive", "@high");
+                this._newRoomButton.classList.remove("~neutral");
+                this._newRoomButton.classList.remove("@low");
+            } else {
+                const nameInput = this._newRoomInputs.querySelector("input[type=text]") as HTMLInputElement;
+                const pwInput = this._newRoomInputs.querySelector("input[type=password]") as HTMLInputElement;
+                this._newRoomButton.classList.add("~neutral", "@low");
+                this._newRoomButton.classList.remove("~positive");
+                this._newRoomButton.classList.remove("@high");
+                this._newRoomInputs.textContent = ``;
+                this.cli.cmdNewRoom(nameInput.value, pwInput.value, (success: boolean = false) => {
+                    if (success) {
+                        this.onJoinRoom(success);
+                        let descriptor = this.cli.room.nick == "" ? this.cli.room.rid : this.cli.room.nick;
+                        window.notif.customSuccess("roomCreated", `Room "${descriptor}" created.`);
+                    }
+                });
             }
-        });
+        };
     }
 }

@@ -112,6 +112,7 @@ class GameBoard {
             document.getElementById("rooms-button") as HTMLButtonElement,
             document.getElementById("copy-room-link") as HTMLButtonElement,
             document.getElementById("new-room") as HTMLButtonElement,
+            document.getElementById("new-room-inputs") as HTMLDivElement,
             (board: BoardData) => {
                 this._reloadBoard(board);
                 this.render();

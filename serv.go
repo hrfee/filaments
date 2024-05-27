@@ -29,18 +29,18 @@ const (
 	iHello             Message = "HELLO\n"
 	iHelloExistingUser         = "HELLO"
 	oHello                     = "HELLO %s %s\n" // UID and Key
-	iNewRoom                   = "NEWROOM"       // Args: UID, Key
+	iNewRoom                   = "NEWROOM"       // Args: UID, Key, b64 nickname, b64 password
 	oNewRoom                   = "NEWROOM %s\n"  // RID
 	iListRooms                 = "ROOMS\n"
-	oListRooms                 = "ROOM %s %d\n"   // RID and playercount
-	iJoinRoom                  = "JOIN"           // Args: UID, Key, RID
-	iLeaveRoom                 = "LEAVE"          // Args: UID, Key
-	iSetBoard                  = "SETBOARD"       // Args: UID, Key, b64-ed board JSON string
-	iGetBoard                  = "BOARD"          // Args: UID, Key
-	oGetBoard                  = "BOARD %s\n"     // Board JSON
-	iGetState                  = "GETSTATE"       // Args: UID, Key
-	oReqStateFromHost          = "HOSTSTATE %s\n" // Sent to host to request board state, arg: src UID
-	ioThemeWord                = "TWORD %s\n"     // Theme word, forwarded from host to client.
+	oListRooms                 = "ROOM %s %d %s %s\n" // RID, playercount, b64 nick, "PASSWORD" if theres a pw
+	iJoinRoom                  = "JOIN"               // Args: UID, Key, RID, b64 password optionally
+	iLeaveRoom                 = "LEAVE"              // Args: UID, Key
+	iSetBoard                  = "SETBOARD"           // Args: UID, Key, b64-ed board JSON string
+	iGetBoard                  = "BOARD"              // Args: UID, Key
+	oGetBoard                  = "BOARD %s\n"         // Board JSON
+	iGetState                  = "GETSTATE"           // Args: UID, Key
+	oReqStateFromHost          = "HOSTSTATE %s\n"     // Sent to host to request board state, arg: src UID
+	ioThemeWord                = "TWORD %s\n"         // Theme word, forwarded from host to client.
 	ioSpangram                 = "SPANGRAM\n"
 	iDownloadBoard             = "DLBOARD" // Args: Date YYYY-MM-DD
 	iBoardSummaries            = "BOARDSUMMARIES\n"
@@ -81,9 +81,11 @@ type User struct {
 }
 
 type Room struct {
-	rid   RID
-	host  UID
-	board string
+	rid      RID
+	host     UID
+	board    string
+	nick     string // b64
+	password string // b64
 }
 
 func (r *Room) collectUsers(g *GameServer) []UID {
@@ -108,6 +110,12 @@ func (r *Room) countUsers(g *GameServer) (count int) {
 
 func (r Room) ShouldDelete(g *GameServer) bool {
 	return r.countUsers(g) <= 0
+}
+
+func (r *Room) hasPassword() bool { return r.password != "" }
+
+func (r *Room) passwordMatches(p string) bool {
+	return r.password == p
 }
 
 func (g *GameServer) DeleteRoom(rid RID) {
@@ -355,7 +363,7 @@ func (g *GameServer) cmdHello(c *websocket.Conn) UID {
 		room: "",
 	}
 	g.resp(c, oHello, uuid, uk)
-	fmt.Printf("New user, assigned \"%s\"", uuid)
+	fmt.Printf("New user, assigned \"%s\"\n", uuid)
 	return uuid
 }
 
@@ -384,28 +392,50 @@ func (g *GameServer) auth(args []string) *User {
 }
 
 func (g *GameServer) cmdNewRoom(c *websocket.Conn, args []string) {
+	log.Printf("got line %+v\n", args)
 	u := g.auth(args)
 	if u == nil {
 		g.resp(c, oInvalid)
 		return
 	}
+
+	nickPass := []string{"", ""}
+	if len(args) >= 4 {
+		nickPass = strings.SplitN(args[3], " ", 2)
+	}
+
 	rid := RID(shortuuid.New())
 	g.rooms[rid] = Room{
-		rid:   rid,
-		host:  u.uid,
-		board: "",
+		rid:      rid,
+		host:     u.uid,
+		board:    "",
+		nick:     nickPass[0],
+		password: nickPass[1],
 	}
 	g.resp(c, oNewRoom, rid)
 }
 
 func (g *GameServer) cmdListRooms(c *websocket.Conn) {
+	pw := "PASSWORD"
+	nick := "NONE"
 	for _, room := range g.rooms {
-		g.resp(c, oListRooms, room.rid, room.countUsers(g))
+		if room.password != "" {
+			pw = "PASSWORD"
+		} else {
+			pw = ""
+		}
+		if room.nick != "" {
+			nick = room.nick
+		} else {
+			nick = "NONE"
+		}
+		g.resp(c, oListRooms, room.rid, room.countUsers(g), nick, pw)
 	}
 	g.resp(c, oFinished)
 }
 
 func (g *GameServer) cmdJoinRoom(c *websocket.Conn, args []string) {
+	log.Printf("got line %+v\n", args)
 	u := g.auth(args)
 	if u == nil {
 		g.resp(c, oInvalid)
@@ -415,10 +445,20 @@ func (g *GameServer) cmdJoinRoom(c *websocket.Conn, args []string) {
 		g.resp(c, oInvalid)
 		return
 	}
-	rid := RID(args[3])
+	ridPassword := strings.SplitN(args[3], " ", 3)
+	rid := RID(ridPassword[0])
 	room, ok := g.rooms[rid]
 	if !ok {
+		log.Printf("\"%s\": Join room failed: room \"%s\" doesn't exist\n", u.uid, rid)
 		g.resp(c, oFail)
+		return
+	}
+	pw := ""
+	if len(ridPassword) > 1 {
+		pw = ridPassword[1]
+	}
+	if room.hasPassword() && !room.passwordMatches(pw) {
+		g.resp(c, oInvalid)
 		return
 	}
 	if u.room != "" {
@@ -431,6 +471,7 @@ func (g *GameServer) cmdJoinRoom(c *websocket.Conn, args []string) {
 		msgType: mPlayerJoined,
 		src:     u.uid,
 	}, u.uid)
+	log.Printf("Joined!\n")
 }
 
 func (g *GameServer) cmdLeaveRoom(c *websocket.Conn, args []string) {
