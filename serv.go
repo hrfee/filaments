@@ -392,16 +392,20 @@ func (g *GameServer) auth(args []string) *User {
 }
 
 func (g *GameServer) cmdNewRoom(c *websocket.Conn, args []string) {
-	log.Printf("got line %+v\n", args)
 	u := g.auth(args)
 	if u == nil {
 		g.resp(c, oInvalid)
 		return
 	}
 
-	nickPass := []string{"", ""}
+	nick := ""
+	pass := ""
 	if len(args) >= 4 {
-		nickPass = strings.SplitN(args[3], " ", 2)
+		nickPass := strings.SplitN(args[3], " ", 2)
+		nick = nickPass[0]
+		if len(nickPass) > 1 {
+			pass = nickPass[1]
+		}
 	}
 
 	rid := RID(shortuuid.New())
@@ -409,8 +413,8 @@ func (g *GameServer) cmdNewRoom(c *websocket.Conn, args []string) {
 		rid:      rid,
 		host:     u.uid,
 		board:    "",
-		nick:     nickPass[0],
-		password: nickPass[1],
+		nick:     nick,
+		password: pass,
 	}
 	g.resp(c, oNewRoom, rid)
 }
