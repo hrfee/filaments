@@ -577,7 +577,9 @@ export class MultiplayerUI {
 
     ridFromURL = (): RID => {
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get("room") as RID;
+        let r = urlParams.get("room");
+        if (r) return r as RID;
+        else return "";
         /* let s = window.location.href.split("?room=");
         if (s.length < 2) return "";
         return s[s.length-1] as RID; */
@@ -585,7 +587,9 @@ export class MultiplayerUI {
 
     passwordFromURL = (): string => {
         const urlParams = new URLSearchParams(window.location.search);
-        return unicodeB64Decode(urlParams.get("password"));
+        let p = urlParams.get("password");
+        if (p) return unicodeB64Decode(p);
+        else return "";
         /* let s = window.location.href.split("&password=");
         if (s.length < 2) return "";
         return unicodeB64Decode(s[s.length-1]); */
