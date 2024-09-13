@@ -4,7 +4,7 @@
 
 Re-implementation of the [NYT Strands](https://www.nytimes.com/games/strands) game, with some multiplayer functionality, and the ability to play past games.
 
-Uses the same board files as the original, which can be sourced from https://www.nytimes.com/games-assets/strands/. 
+Uses the same board files as the original, which can be sourced from ~~https://www.nytimes.com/games-assets/strands/~~ https://www.nytimes.com/svc/strands/v2/. 
 
 The web-based game can operate mostly without external dependency, provided a board `.json` file.
 A server facilitates multiplayer games within "rooms", as well as quick access to boards from NYT, which are downloaded and cached on request.
@@ -15,7 +15,7 @@ Like a crossword, except words aren't arranged in straight lines, a rough clue i
 
 Click and drag across letters to select them, then release to end your guess. Alternatively, tap each letter, then tap the last a second time to end the guess.
 
-Once 3 unrelated words have been found, the progress bar over the "Get hint" button will fill, and clicking will highlight the words in one of the answers.
+Once 3 unrelated words have been found, the progress bar over the "Get hint" button will fill, and clicking will highlight the letters in one of the answers.
 
 ## the server
 
