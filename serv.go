@@ -17,6 +17,9 @@ import (
 )
 
 const (
+	// No longer used (probably since 2024-08-24)
+	// STRAND_URI = "https://www.nytimes.com/games-assets/strands/%s.json"
+	STRAND_URI  = "https://www.nytimes.com/svc/strands/v2/%s.json"
 	BOARD_CACHE = "boards.json"
 )
 
@@ -559,6 +562,8 @@ func (g *GameServer) cmdBoardSummaries(c *websocket.Conn) {
 		date := dateToBoardFName(day)
 		summary := g.boards.Get(date)
 		if summary == nil {
+			log.Printf("Found no board for %s, skipping", date)
+			day = day.Add(time.Duration(-24 * time.Hour))
 			continue
 		}
 		g.resp(c, oBoardSummaries,
@@ -774,13 +779,14 @@ func (b *BoardCache) Get(date string) *BoardSummary {
 	if summary, ok := b.Summaries[date]; ok {
 		return &summary
 	}
-	url := fmt.Sprintf("https://www.nytimes.com/games-assets/strands/%s.json", date)
+	url := fmt.Sprintf(STRAND_URI, date)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("Failed getting board: %d", resp.StatusCode)
 		return nil
 	}
 	bodyBytes, err := io.ReadAll(resp.Body)
@@ -804,7 +810,7 @@ func (b *BoardCache) GetJSON(date string) string {
 	if board, ok := b.Boards[date]; ok {
 		return board
 	}
-	url := fmt.Sprintf("https://www.nytimes.com/games-assets/strands/%s.json", date)
+	url := fmt.Sprintf(STRAND_URI, date)
 	resp, err := http.Get(url)
 	if err != nil {
 		return ""
