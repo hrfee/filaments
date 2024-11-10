@@ -1,13 +1,19 @@
-export interface BoardData {
+export class BoardData {
     printDate: string;
     id: number;
     editor: string;
+    constructors: string;
     spangram: string;
     clue: string;
     startingBoard: string[];
     solutions: string[];
     themeCoords: { [theme: string]: number[][] }; // number[2][]
 }
+
+export function BoardCredits(board: BoardData): string {
+    if (board.editor == board.constructors || board.constructors == "") return board.editor;
+    return board.editor + ", " + board.constructors;
+};
 
 export interface BoardState {
     themeWordsFound: string[];

@@ -406,11 +406,14 @@ class GameBoard {
     private validateGuess(word: string): number {
         let ret = 0;
         if (this._board.solutions.includes(word)) ret += 1;
-        else return ret;
+        // Spangram is sometimes a combination of multiple "solutions", so might not be in the list as-is.
+        // else return ret;
         if (this._board.spangram == word) {
-            ret += 2;
+            // ret += 2;
+            ret = 3;
             return ret;
         }
+        if (ret == 0) return ret;
         if (word in this._board.themeCoords) {
             let coords = this._board.themeCoords[word];
             let match = true;
