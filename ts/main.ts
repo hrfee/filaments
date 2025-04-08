@@ -405,7 +405,8 @@ class GameBoard {
     // 0 = Invalid. 1 = Valid word, you get a point towards hints. 2 = Valid theme word, 3 = Valid spangram.
     private validateGuess(word: string): number {
         let ret = 0;
-        if (this._board.solutions.includes(word)) ret += 1;
+        // Theme words are sometimes not in "solutions", so check for both
+        if (this._board.themeCoords[word] || this._board.solutions.includes(word)) ret += 1;
         // Spangram is sometimes a combination of multiple "solutions", so might not be in the list as-is.
         // else return ret;
         if (this._board.spangram == word) {
