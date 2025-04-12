@@ -7,7 +7,7 @@ export class BoardData {
     clue: string;
     startingBoard: string[];
     solutions: string[];
-    themeCoords: { [theme: string]: number[][] }; // number[2][]
+    themeCoords: { [theme: string]: Array<[number, number]> };
 }
 
 export function BoardCredits(board: BoardData): string {
@@ -33,6 +33,7 @@ export const defaultBoard: BoardData = {
     printDate: "2024-05-24",
     id: -1,
     editor: "Harvey Tindall",
+    constructors: "Harvey Tindall",
     spangram: "ALRIGHTY",
     clue: "(Down)load a game below to start.",
     startingBoard: [
