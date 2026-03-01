@@ -11,7 +11,7 @@ A server facilitates multiplayer games within "rooms", as well as quick access t
 
 ## the game
 
-Like a crossword, except words aren't arranged in straight lines, a rough clue is given, and the true theme is included in the board, spanning it from left-right or top-bottom (dubbed a "Spangram" by the original, and here). Hints are also available, once you've found enough valid, but unrelated words on the board.
+Like a word search, except words aren't arranged in straight lines, a rough clue is given, and the true theme is included in the board, spanning it from left-right or top-bottom (dubbed a "Spangram" by the original, and here). Hints are also available, once you've found enough valid, but unrelated words on the board.
 
 Click and drag across letters to select them, then release to end your guess. Alternatively, tap each letter, then tap the last a second time to end the guess.
 
